@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Golfinho Cosméticos – BI Comercial</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#EFF9FB;color:#1a2e30;}
+:root{
+  --p:#007B8E;
+  --pd:#005F6F;
+  --ac:#26C6DA;
+  --al:#E0F7FA;
+  --bg:#EFF9FB;
+  --card:#fff;
+  --txt:#1a2e30;
+  --mu:#5a7478;
+  --ok:#2e7d32;
+  --wa:#e65100;
+  --da:#c62828;
+  --bd:#B2EBF2;
+}
+
+/* LOGIN */
+#login-screen{
+  min-height:100vh;
+  background:linear-gradient(150deg,#004d5c 0%,#007B8E 55%,#26C6DA 100%);
+  display:flex;align-items:center;justify-content:center;
+}
+.login-card{
+  background:#fff;border-radius:22px;padding:44px 56px;text-align:center;
+  box-shadow:0 24px 64px rgba(0,0,0,.22);max-width:420px;width:90%;
+}
+.login-logo-img{width:220px;border-radius:12px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,.12);}
+.login-sub{font-size:13px;color:var(--mu);margin-bottom:34px;}
+.login-label{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--mu);margin-bottom:16px;}
+.login-btn{
+  display:block;width:100%;padding:15px;margin-bottom:12px;
+  border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.login-btn.prim{background:linear-gradient(135deg,#007B8E,#26C6DA);color:#fff;}
+.login-btn.sec{background:var(--al);color:var(--pd);border:2px solid var(--bd);}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,123,142,.28);}
+
+/* SCREENS */
+#app-screen,#rep-screen,#rep-select-screen{display:none;}
+
+/* HEADER */
+.app-header{
+  background:linear-gradient(135deg,var(--pd),var(--p));
+  color:#fff;padding:12px 22px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 10px rgba(0,0,0,.15);
+}
+.app-header-left{display:flex;align-items:center;gap:12px;}
+.hdr-logo{height:36px;border-radius:6px;}
+.app-header-title{font-size:16px;font-weight:700;line-height:1.2;}
+.app-header-sub{font-size:11px;opacity:.8;}
+.btn-sair{
+  background:rgba(255,255,255,.18);color:#fff;
+  border:1px solid rgba(255,255,255,.35);
+  padding:7px 16px;border-radius:8px;cursor:pointer;font-size:13px;transition:background .2s;
+}
+.btn-sair:hover{background:rgba(255,255,255,.28);}
+
+/* TABS */
+.tab-nav{background:#fff;border-bottom:2px solid var(--bd);padding:0 22px;display:flex;overflow-x:auto;}
+.tab-btn{
+  padding:13px 20px;background:none;border:none;border-bottom:3px solid transparent;
+  margin-bottom:-2px;cursor:pointer;font-size:14px;font-weight:500;color:var(--mu);white-space:nowrap;transition:all .2s;
+}
+.tab-btn.active{color:var(--p);border-bottom-color:var(--p);font-weight:600;}
+.tab-btn:hover{color:var(--p);}
+
+.tab-content{padding:22px;max-width:1300px;margin:0 auto;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(172px,1fr));gap:13px;margin-bottom:20px;}
+.kpi-card{
+  background:#fff;border-radius:14px;padding:18px 20px;
+  box-shadow:0 2px 10px rgba(0,123,142,.08);border-left:4px solid var(--p);
+}
+.kpi-card.ac{border-left-color:var(--ac);}
+.kpi-card.ok{border-left-color:var(--ok);}
+.kpi-card.wa{border-left-color:var(--wa);}
+.kpi-card.in{border-left-color:#1565C0;}
+.kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:6px;}
+.kpi-value{font-size:23px;font-weight:700;color:var(--txt);}
+.kpi-sub{font-size:12px;color:var(--mu);margin-top:4px;}
+.prog{height:7px;background:#B2EBF2;border-radius:4px;overflow:hidden;margin-top:8px;}
+.prog-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--p),var(--ac));}
+.prog-fill.ok{background:linear-gradient(90deg,#2e7d32,#43a047);}
+.prog-fill.da{background:linear-gradient(90deg,#c62828,#e53935);}
+
+/* CHARTS */
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px;margin-bottom:20px;}
+.chart-card{background:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 2px 10px rgba(0,123,142,.08);}
+.chart-card.full{grid-column:1/-1;}
+.chart-title{font-size:13px;font-weight:600;color:var(--txt);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--bd);}
+.ch{position:relative;height:240px;}
+.ch.tall{height:310px;}
+
+/* TABLE */
+.table-wrap{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,123,142,.08);}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--p);color:#fff;padding:11px 15px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;}
+td{padding:11px 15px;border-bottom:1px solid #E0F7FA;font-size:13px;}
+tr:last-child td{border-bottom:none;}
+tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
+
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.b-ok{background:#e8f5e9;color:#2e7d32;}
+.b-wa{background:#fff3e0;color:#e65100;}
+.b-da{background:#ffebee;color:#c62828;}
+.b-ch{background:#E0F7FA;color:#00838F;}
+.b-exc{background:#C8E6C9;color:#1B5E20;font-weight:700;}
+.b-mok{background:#E0F7FA;color:#006064;}
+.b-mal{background:#FFF3E0;color:#BF360C;font-weight:700;}
+
+/* DRILL */
+.drill{display:none;background:var(--bg);border:2px solid var(--bd);border-radius:14px;padding:20px;margin-top:14px;}
+.drill.open{display:block;}
+.drill-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.drill-title{font-size:15px;font-weight:600;color:var(--p);}
+.drill-x{background:none;border:none;cursor:pointer;color:var(--mu);font-size:20px;}
+.drill-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* REP SELECT */
+.rep-select-card{
+  background:#fff;border-radius:14px;padding:28px;
+  max-width:580px;margin:44px auto;
+  box-shadow:0 4px 20px rgba(0,123,142,.1);
+}
+.rep-item{
+  display:flex;align-items:center;padding:14px;
+  border:2px solid var(--bd);border-radius:12px;margin-bottom:10px;
+  cursor:pointer;transition:all .2s;
+}
+.rep-item:hover{border-color:var(--p);background:var(--al);transform:translateX(4px);}
+.rep-av{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--p),var(--ac));
+  color:#fff;font-weight:700;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  margin-right:14px;flex-shrink:0;
+}
+.rep-inf{flex:1;}
+.rep-nm{font-weight:600;font-size:15px;color:var(--txt);}
+.rep-rg{font-size:12px;color:var(--mu);}
+.rep-ft{font-weight:700;color:var(--p);font-size:14px;}
+
+.sec-hd{
+  font-size:15px;font-weight:600;color:var(--p);
+  margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--bd);
+}
+
+@media(max-width:700px){
+  .kpi-grid{grid-template-columns:1fr 1fr;}
+  .chart-grid{grid-template-columns:1fr;}
+  .drill-grid{grid-template-columns:1fr;}
+  .tab-content{padding:14px;}
+  .login-card{padding:34px 24px;}
+  .login-logo-img{width:180px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <img src="logo golfinho.png" class="login-logo-img" alt="Golfinho Cosméticos">
+    <div class="login-sub">Pato Branco / PR &nbsp;·&nbsp; BI Comercial</div>
+    <div class="login-label">Selecione seu perfil</div>
+    <button class="login-btn prim" onclick="loginDiretoria()">🏢 &nbsp; Diretoria</button>
+    <button class="login-btn sec"  onclick="showRepSelect()">👤 &nbsp; Representante</button>
+  </div>
+</div>
+
+<!-- REP SELECT -->
+<div id="rep-select-screen">
+  <div class="app-header">
+    <div class="app-header-left">
+      <img src="logo golfinho.png" class="hdr-logo" alt="Golfinho">
+      <div>
+        <div class="app-header-title">Golfinho Cosméticos</div>
+        <div class="app-header-sub">Selecione o representante</div>
+      </div>
+    </div>
+    <button class="btn-sair" onclick="voltarLogin()">← Voltar</button>
+  </div>
+  <div style="padding:16px">
+    <div class="rep-select-card" id="rep-list"></div>
+  </div>
+</div>
+
+<!-- DIRETORIA -->
+<div id="app-screen">
+  <div class="app-header">
+    <div class="app-header-left">
+      <img src="logo golfinho.png" class="hdr-logo" alt="Golfinho">
+      <div>
+        <div class="app-header-title">Golfinho Cosméticos &nbsp;|&nbsp; Diretoria</div>
+        <div class="app-header-sub" id="dir-sub"></div>
+      </div>
+    </div>
+    <button class="btn-sair" onclick="voltarLogin()">Sair</button>
+  </div>
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="setTab(this,'dir','visao')">Visão Geral</button>
+    <button class="tab-btn"        onclick="setTab(this,'dir','cat')">Categorias</button>
+    <button class="tab-btn"        onclick="setTab(this,'dir','reps')">Representantes</button>
+    <button class="tab-btn"        onclick="setTab(this,'dir','cli')">Clientes</button>
+    <button class="tab-btn"        onclick="setTab(this,'dir','estoque')">📦 Estoque</button>
+  </div>
+  <div class="tab-content">
+
+    <div id="dir-tab-visao" class="tab-panel active">
+      <div class="kpi-grid" id="dir-kpis"></div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title">Meta × Faturamento — Junho/2026</div>
+          <div class="ch"><canvas id="ch-ring"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Faturamento por Canal</div>
+          <div class="ch"><canvas id="ch-canal"></canvas></div>
+        </div>
+        <div class="chart-card full">
+          <div class="chart-title">Evolução Mensal 2026 vs Meta (R$)</div>
+          <div class="ch tall"><canvas id="ch-mensal"></canvas></div>
+        </div>
+        <div class="chart-card full">
+          <div class="chart-title">Evolução da Margem (%) vs Meta 40%</div>
+          <div class="ch"><canvas id="ch-margem"></canvas></div>
+        </div>
+      </div>
+      <div class="sec-hd" style="margin-top:8px">📦 Visão de Estoque</div>
+      <div class="kpi-grid" id="est-kpis"></div>
+      <div class="table-wrap" id="est-tbl"></div>
+    </div>
+
+    <div id="dir-tab-cat" class="tab-panel">
+      <div class="chart-grid">
+        <div class="chart-card full">
+          <div class="chart-title">Faturamento por Categoria vs Meta — Junho/2026</div>
+          <div class="ch tall"><canvas id="ch-cat"></canvas></div>
+        </div>
+      </div>
+      <div id="cat-tbl" style="margin-top:20px"></div>
+    </div>
+
+    <div id="dir-tab-reps" class="tab-panel">
+      <p style="font-size:13px;color:var(--mu);margin-bottom:16px">Clique em um representante para ver detalhes</p>
+      <div class="table-wrap" id="rep-tbl"></div>
+      <div class="drill" id="drill-rep">
+        <div class="drill-hd">
+          <div class="drill-title" id="drill-rep-title"></div>
+          <button class="drill-x" onclick="document.getElementById('drill-rep').classList.remove('open')">✕</button>
+        </div>
+        <div class="drill-grid">
+          <div class="chart-card">
+            <div class="chart-title">Evolução Mensal vs Meta</div>
+            <div class="ch"><canvas id="ch-d-men"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Mix de Categorias</div>
+            <div class="ch"><canvas id="ch-d-cat"></canvas></div>
+          </div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="sec-hd" id="drill-cli-hd"></div>
+          <div class="table-wrap" id="drill-cli-tbl"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="dir-tab-cli" class="tab-panel">
+      <div class="sec-hd">Top Clientes — Consolidado</div>
+      <div class="table-wrap" id="all-cli-tbl" style="margin-top:4px"></div>
+    </div>
+
+    <div id="dir-tab-estoque" class="tab-panel">
+      <div class="kpi-grid" id="est2-kpis"></div>
+      <div class="chart-grid" style="margin-bottom:20px">
+        <div class="chart-card full">
+          <div class="chart-title">Valor em Estoque por Categoria — Verde: Normal · Laranja: Atenção · Vermelho: Parado</div>
+          <div class="ch"><canvas id="ch-est-bar"></canvas></div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--mu);margin-bottom:14px">Clique em uma categoria para ver os produtos</p>
+      <div class="table-wrap" id="est2-tbl"></div>
+      <div class="drill" id="drill-est">
+        <div class="drill-hd">
+          <div class="drill-title" id="drill-est-title"></div>
+          <button class="drill-x" onclick="document.getElementById('drill-est').classList.remove('open')">✕</button>
+        </div>
+        <div class="kpi-grid" id="drill-est-kpis" style="margin-bottom:16px"></div>
+        <div class="table-wrap" id="drill-est-tbl"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- REPRESENTANTE -->
+<div id="rep-screen">
+  <div class="app-header">
+    <div class="app-header-left">
+      <img src="logo golfinho.png" class="hdr-logo" alt="Golfinho">
+      <div>
+        <div class="app-header-title" id="rep-hd-title">Golfinho Cosméticos</div>
+        <div class="app-header-sub"   id="rep-hd-sub"></div>
+      </div>
+    </div>
+    <button class="btn-sair" onclick="voltarLogin()">Sair</button>
+  </div>
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="setTab(this,'rep','prod')">Minha Produção</button>
+    <button class="tab-btn"        onclick="setTab(this,'rep','rcat')">Categorias</button>
+    <button class="tab-btn"        onclick="setTab(this,'rep','rcli')">Meus Clientes</button>
+  </div>
+  <div class="tab-content">
+
+    <div id="rep-tab-prod" class="tab-panel active">
+      <div class="kpi-grid" id="rep-kpis"></div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title">Meta × Faturamento — Junho/2026</div>
+          <div class="ch"><canvas id="ch-r-ring"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Evolução Mensal 2026 vs Meta</div>
+          <div class="ch"><canvas id="ch-r-men"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="rep-tab-rcat" class="tab-panel">
+      <div class="chart-card" style="max-width:680px">
+        <div class="chart-title">Faturamento por Categoria</div>
+        <div class="ch tall"><canvas id="ch-r-cat"></canvas></div>
+      </div>
+    </div>
+
+    <div id="rep-tab-rcli" class="tab-panel">
+      <div class="sec-hd" id="rep-cli-hd"></div>
+      <div class="table-wrap" id="rep-cli-tbl"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────
+const D = {
+  mes: 'Junho/2026',
+  kpis: { fat_mes:487320, meta_mes:520000, fat_ano:2736820, meta_ano:2830000, ticket:1240, cli_ativos:312, novos:18, margem:38.5, margem_meta:40 },
+  meses: ['Jan','Fev','Mar','Abr','Mai','Jun'],
+  fat_m:    [412500,438900,451200,467800,479100,487320],
+  meta_m:   [440000,450000,460000,470000,490000,520000],
+  margem_m: [36.2, 37.1, 38.4, 39.1, 38.8, 38.5],
+  cats: [
+    {n:'Cosméticos/Maquiagem', fat:138500, meta:145000, margem:44},
+    {n:'Cabelos',              fat:121200, meta:130000, margem:41},
+    {n:'Perfumaria',           fat:98700,  meta:100000, margem:38},
+    {n:'Higiene Pessoal',      fat:72300,  meta:75000,  margem:35},
+    {n:'Profissional',         fat:56620,  meta:70000,  margem:29}
+  ],
+  canais: [
+    {n:'Atacado',fat:231800},{n:'Varejo',fat:158400},{n:'Profissional',fat:97120}
+  ],
+  estoque: [
+    { n:'Cosméticos/Maquiagem', val:82400, giro:28, cob:0.9, produtos:[
+      {n:'Base Líquida L\'Oréal',      val:12400, giro:21},
+      {n:'Batom Maybelline',            val:8900,  giro:18},
+      {n:'Paleta de Sombras Ruby Rose', val:11200, giro:26},
+      {n:'Primer Facial NYX',           val:9800,  giro:31},
+      {n:'Corretivo Max Factor',        val:7600,  giro:25},
+      {n:'Blush Vult',                  val:6800,  giro:28},
+      {n:'Máscara de Cílios Océane',    val:8200,  giro:22},
+      {n:'Pó Compacto Dailus',          val:7500,  giro:32},
+      {n:'Contorno Kiko',               val:5400,  giro:38},
+      {n:'Delineador Bruna Tavares',    val:4600,  giro:24}
+    ]},
+    { n:'Cabelos', val:96800, giro:22, cob:1.1, produtos:[
+      {n:'Shampoo TRESemmé',            val:15600, giro:16},
+      {n:'Condicionador Pantene',       val:12800, giro:18},
+      {n:'Máscara Capilar Elseve',      val:18400, giro:20},
+      {n:'Óleo Capilar Amend',          val:11200, giro:24},
+      {n:'Creme de Pentear Salon Line', val:9800,  giro:22},
+      {n:'Tintura Garnier',             val:14200, giro:25},
+      {n:'Spray Finalizador Wella',     val:8100,  giro:28},
+      {n:'Shampoo Seco Kérastase',      val:6700,  giro:19}
+    ]},
+    { n:'Perfumaria', val:142300, giro:48, cob:2.1, produtos:[
+      {n:'Perfume Natura Essencial',    val:28400, giro:42},
+      {n:'Colônia O Boticário',         val:22100, giro:38},
+      {n:'Perfume Egeo O.Boticário',    val:18900, giro:52},
+      {n:'Desodorante Rexona',          val:12600, giro:28},
+      {n:'Perfume Avon Far Away',       val:24800, giro:65},
+      {n:'Colônia Giovanna Baby',       val:8200,  giro:44},
+      {n:'Perfume Mahogany',            val:15400, giro:58},
+      {n:'Body Splash Viv!',            val:11900, giro:36}
+    ]},
+    { n:'Higiene Pessoal', val:38200, giro:18, cob:0.7, produtos:[
+      {n:'Sabonete Dove',               val:6800,  giro:12},
+      {n:'Creme Hidratante Nivea',      val:8900,  giro:16},
+      {n:'Protetor Solar Episol',       val:7200,  giro:22},
+      {n:'Esfoliante Dermachem',        val:4800,  giro:20},
+      {n:'Shampoo Elsève',              val:5400,  giro:14},
+      {n:'Absorvente Always',           val:5100,  giro:14}
+    ]},
+    { n:'Profissional', val:187600, giro:94, cob:4.8, produtos:[
+      {n:'Tinta Profissional Wella',           val:42600, giro:78},
+      {n:'Queratina Brazilian Blowout',        val:38400, giro:112},
+      {n:'Selante Capilar Cadiveu',            val:28900, giro:95},
+      {n:'Progressiva Inoar',                  val:32100, giro:88},
+      {n:'Kit Botox Capilar',                  val:24800, giro:102},
+      {n:'Shampoo Antirresíduo Schwarzkopf',   val:12600, giro:64},
+      {n:'Máscara Profissional Alfaparf',       val:8200,  giro:86}
+    ]}
+  ],
+  reps: [
+    { id:1, nome:'Fernanda Oliveira', reg:'Pato Branco/PR', fat:98500,  meta:100000, cli:68, margem:40,
+      fm:[72000,78500,82000,88900,94200,98500], mm:[85000,87000,89000,92000,96000,100000],
+      cats:[{n:'Cosméticos/Maquiagem',fat:31200,margem:43},{n:'Cabelos',fat:24800,margem:40},{n:'Perfumaria',fat:19600,margem:39},{n:'Higiene Pessoal',fat:14200,margem:35},{n:'Profissional',fat:8700,margem:28}],
+      clis:[{n:'Farmácia Bem Estar',fat:18400,c:'Atacado'},{n:'Salão Glamour',fat:14200,c:'Profissional'},{n:'Perfumaria Bella',fat:12800,c:'Varejo'},{n:'Mercado Central',fat:11500,c:'Atacado'},{n:'Ótica Fashion',fat:9600,c:'Varejo'},{n:'Studio Beleza Total',fat:8900,c:'Profissional'},{n:'Drogaria Nortão',fat:7800,c:'Atacado'},{n:'Empório da Beleza',fat:6900,c:'Varejo'}]
+    },
+    { id:2, nome:'Camila Santos', reg:'Chapecó/SC', fat:112400, meta:110000, cli:74, margem:43,
+      fm:[82000,88900,94200,99800,106500,112400], mm:[90000,92000,95000,100000,105000,110000],
+      cats:[{n:'Cosméticos/Maquiagem',fat:38900,margem:46},{n:'Cabelos',fat:29800,margem:43},{n:'Perfumaria',fat:22100,margem:40},{n:'Higiene Pessoal',fat:14200,margem:37},{n:'Profissional',fat:7400,margem:32}],
+      clis:[{n:'Drogaria Saúde Total',fat:22100,c:'Atacado'},{n:'Studio Cabelo & Arte',fat:18900,c:'Profissional'},{n:'Cosméticos VIP',fat:16400,c:'Varejo'},{n:'Supermercado Norte',fat:14200,c:'Atacado'},{n:'Salão Espaço Beleza',fat:12800,c:'Profissional'},{n:'Perfumaria da Praça',fat:10900,c:'Varejo'},{n:'Farmácia Familiar',fat:9200,c:'Atacado'},{n:'Beauty Store',fat:7900,c:'Varejo'}]
+    },
+    { id:3, nome:'Ricardo Borges', reg:'Francisco Beltrão/PR', fat:89200, meta:95000, cli:61, margem:37,
+      fm:[68000,72500,76800,80200,84900,89200], mm:[78000,80000,82000,85000,90000,95000],
+      cats:[{n:'Cosméticos/Maquiagem',fat:24600,margem:41},{n:'Cabelos',fat:22800,margem:38},{n:'Perfumaria',fat:19400,margem:36},{n:'Higiene Pessoal',fat:14200,margem:33},{n:'Profissional',fat:8200,margem:27}],
+      clis:[{n:'Farmácia Popular',fat:19200,c:'Atacado'},{n:'Bazar da Beleza',fat:15600,c:'Varejo'},{n:'Mercadinho São José',fat:13400,c:'Atacado'},{n:'Depósito Cosméticos',fat:11800,c:'Atacado'},{n:'Loja das Fragrâncias',fat:9200,c:'Varejo'},{n:'Salão Belo Corte',fat:8100,c:'Profissional'},{n:'Perfumaria Chique',fat:6900,c:'Varejo'},{n:'Mercado Boa Vista',fat:5000,c:'Atacado'}]
+    },
+    { id:4, nome:'Patrícia Lima', reg:'Dois Vizinhos/PR', fat:104800, meta:100000, cli:71, margem:41,
+      fm:[79000,84200,88900,94500,99800,104800], mm:[82000,85000,88000,92000,96000,100000],
+      cats:[{n:'Cosméticos/Maquiagem',fat:32400,margem:44},{n:'Cabelos',fat:28200,margem:41},{n:'Perfumaria',fat:22800,margem:39},{n:'Higiene Pessoal',fat:13900,margem:36},{n:'Profissional',fat:7500,margem:29}],
+      clis:[{n:'Drogaria Nobre',fat:24500,c:'Atacado'},{n:'Salão Princesa',fat:19800,c:'Profissional'},{n:'Perfumaria Elite',fat:17200,c:'Varejo'},{n:'Empório Beleza',fat:15900,c:'Varejo'},{n:'Studio Hair Pro',fat:12400,c:'Profissional'},{n:'Farmácia Dois Vizinhos',fat:10200,c:'Atacado'},{n:'Loja Cosméticos & Mais',fat:8900,c:'Varejo'},{n:'Bazar Tudo Belo',fat:6900,c:'Varejo'}]
+    },
+    { id:5, nome:'André Costa', reg:'Palmas/PR', fat:82420, meta:115000, cli:38, margem:32,
+      fm:[68000,71200,74800,77900,80100,82420], mm:[95000,98000,100000,105000,110000,115000],
+      cats:[{n:'Cosméticos/Maquiagem',fat:11400,margem:36},{n:'Cabelos',fat:15600,margem:33},{n:'Perfumaria',fat:14807,margem:30},{n:'Higiene Pessoal',fat:15800,margem:31},{n:'Profissional',fat:24813,margem:26}],
+      clis:[{n:'Farmácia Vida',fat:16800,c:'Atacado'},{n:'Bazar Mix',fat:13200,c:'Varejo'},{n:'Mercado Bom Preço',fat:11600,c:'Atacado'},{n:'Loja Beleza & Cia',fat:10900,c:'Varejo'},{n:'Salão Corte & Arte',fat:8920,c:'Profissional'},{n:'Farmácia Palmas',fat:7400,c:'Atacado'},{n:'Beauty Mix',fat:6800,c:'Varejo'},{n:'Empório do Bem',fat:6800,c:'Varejo'}]
+    }
+  ]
+};
+
+// ── HELPERS ───────────────────────────────────────────────────
+const fmt = v => 'R$ ' + v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+const pct = (a,b) => ((a/b)*100).toFixed(1)+'%';
+const ap  = (f,m) => Math.round((f/m)*100);
+const ini = n => n.split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();
+const CATS_C = ['#007B8E','#26C6DA','#4DB6AC','#80CBC4','#00ACC1'];
+
+function badge(f,m){
+  const p=ap(f,m), cls=p>=100?'b-ok':p>=85?'b-wa':'b-da';
+  return `<span class="badge ${cls}">${p}%</span>`;
+}
+
+const charts={};
+Chart.register(ChartDataLabels);
+
+const DL_BAR  = { anchor:'end', align:'top',  formatter:v=>'R$'+(v/1000).toFixed(0)+'k', font:{size:9,weight:'bold'}, color:'#005F6F', padding:0 };
+const DL_BARH = { anchor:'end', align:'right', formatter:v=>'R$'+(v/1000).toFixed(0)+'k', font:{size:9,weight:'bold'}, color:'#005F6F', padding:2 };
+const DL_PIE  = { formatter:(v,ctx)=>{ const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return v/t<0.06?'':((v/t)*100).toFixed(1)+'%'; }, color:'#fff', font:{size:11,weight:'bold'} };
+const DL_OFF  = { display:false };
+
+function mkChart(id,cfg){
+  if(charts[id]) charts[id].destroy();
+  const el=document.getElementById(id); if(!el) return;
+  charts[id]=new Chart(el,cfg);
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────
+function show(id){
+  document.getElementById('login-screen').style.display = id==='login-screen' ? 'flex' : 'none';
+  ['rep-select-screen','app-screen','rep-screen']
+    .forEach(s=>{ document.getElementById(s).style.display = s===id?'block':'none'; });
+}
+function voltarLogin(){ show('login-screen'); }
+
+function setTab(btn,prefix,name){
+  const screen = prefix==='dir' ? 'app-screen' : 'rep-screen';
+  document.getElementById(screen).querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(screen).querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(prefix+'-tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  setTimeout(()=>window.dispatchEvent(new Event('resize')),50);
+}
+
+// ── DIRETORIA ─────────────────────────────────────────────────
+function loginDiretoria(){
+  show('app-screen');
+  document.getElementById('dir-sub').textContent = D.mes+' · Visão Consolidada';
+  buildDirKPIs(); buildDirCharts(); buildRepTable(); buildAllCli(); buildCatTable(); buildEstoque(); buildEstoqueTab();
+}
+
+function buildDirKPIs(){
+  const k=D.kpis, p=ap(k.fat_mes,k.meta_mes), pa=ap(k.fat_ano,k.meta_ano);
+  const pc=p>=100?'ok':p<80?'da':'';
+  document.getElementById('dir-kpis').innerHTML=`
+    <div class="kpi-card">
+      <div class="kpi-label">Faturamento Mês</div>
+      <div class="kpi-value">${fmt(k.fat_mes)}</div>
+      <div class="kpi-sub">Meta: ${fmt(k.meta_mes)}</div>
+      <div class="prog"><div class="prog-fill ${pc}" style="width:${Math.min(100,p)}%"></div></div>
+    </div>
+    <div class="kpi-card ac">
+      <div class="kpi-label">Atingimento Mês</div>
+      <div class="kpi-value">${p}%</div>
+      <div class="kpi-sub">${D.mes}</div>
+    </div>
+    <div class="kpi-card ok">
+      <div class="kpi-label">Faturamento Anual</div>
+      <div class="kpi-value">${fmt(k.fat_ano)}</div>
+      <div class="kpi-sub">Meta: ${fmt(k.meta_ano)} · ${pa}%</div>
+    </div>
+    <div class="kpi-card in">
+      <div class="kpi-label">Ticket Médio</div>
+      <div class="kpi-value">${fmt(k.ticket)}</div>
+      <div class="kpi-sub">Por pedido</div>
+    </div>
+    <div class="kpi-card wa">
+      <div class="kpi-label">Clientes Ativos</div>
+      <div class="kpi-value">${k.cli_ativos}</div>
+      <div class="kpi-sub">+${k.novos} novos este mês</div>
+    </div>
+    <div class="kpi-card" style="border-left-color:${k.margem>=42?'#2e7d32':k.margem>=36?'#007B8E':'#e65100'}">
+      <div class="kpi-label">Margem Mês</div>
+      <div class="kpi-value">${k.margem}%</div>
+      <div class="kpi-sub">Meta: ${k.margem_meta}% &nbsp;<span class="badge ${mStat(k.margem)[0]}">${mStat(k.margem)[1]}</span></div>
+    </div>`;
+}
+
+function buildDirCharts(){
+  mkChart('ch-ring',{type:'doughnut',data:{
+    labels:['Realizado','A Atingir'],
+    datasets:[{data:[D.kpis.fat_mes,Math.max(0,D.kpis.meta_mes-D.kpis.fat_mes)],
+      backgroundColor:['#007B8E','#B2EBF2'],borderWidth:0,datalabels:DL_PIE}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'70%',
+      plugins:{datalabels:DL_PIE,legend:{position:'bottom'},tooltip:{callbacks:{label:c=>fmt(c.raw)}}}}
+  });
+  mkChart('ch-canal',{type:'pie',data:{
+    labels:D.canais.map(c=>c.n),
+    datasets:[{data:D.canais.map(c=>c.fat),backgroundColor:['#007B8E','#26C6DA','#4DB6AC'],borderWidth:0,datalabels:DL_PIE}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{datalabels:DL_PIE,legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)+' ('+pct(c.raw,D.kpis.fat_mes)+')'}}}}
+  });
+  mkChart('ch-mensal',{type:'bar',data:{labels:D.meses,datasets:[
+    {label:'Faturamento',data:D.fat_m,backgroundColor:'#007B8ECC',borderRadius:5,datalabels:DL_BAR},
+    {label:'Meta',data:D.meta_m,type:'line',borderColor:'#e65100',backgroundColor:'transparent',
+      pointBackgroundColor:'#e65100',borderWidth:2,pointRadius:4,tension:.3,datalabels:DL_OFF}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:22}},
+    plugins:{datalabels:{},legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},
+    scales:{y:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
+  });
+  mkChart('ch-margem',{type:'line',data:{labels:D.meses,datasets:[
+    {label:'Margem Real (%)',data:D.margem_m,borderColor:'#007B8E',backgroundColor:'rgba(0,123,142,.12)',
+      borderWidth:2.5,pointRadius:5,pointBackgroundColor:D.margem_m.map(v=>v>=42?'#2e7d32':v>=36?'#007B8E':'#e65100'),
+      pointBorderColor:'#fff',pointBorderWidth:2,tension:.35,fill:true,datalabels:{
+        anchor:'top',align:'top',formatter:v=>v+'%',font:{size:10,weight:'bold'},
+        color:ctx=>D.margem_m[ctx.dataIndex]>=42?'#2e7d32':D.margem_m[ctx.dataIndex]>=36?'#007B8E':'#e65100'
+      }},
+    {label:'Meta (40%)',data:D.meses.map(()=>40),borderColor:'#e65100',borderDash:[6,4],borderWidth:1.5,
+      pointRadius:0,fill:false,datalabels:DL_OFF}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:24}},
+    plugins:{datalabels:{},legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw+'%'}}},
+    scales:{y:{min:30,max:50,ticks:{callback:v=>v+'%'},grid:{color:'#E0F7FA'}},
+            x:{grid:{color:'#E0F7FA'}}}}
+  });
+  mkChart('ch-cat',{type:'bar',data:{labels:D.cats.map(c=>c.n),datasets:[
+    {label:'Faturamento',data:D.cats.map(c=>c.fat),backgroundColor:'#007B8ECC',borderRadius:4,datalabels:DL_BARH},
+    {label:'Meta',       data:D.cats.map(c=>c.meta),backgroundColor:'#26C6DA55',borderRadius:4,datalabels:DL_OFF}
+  ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    layout:{padding:{right:60}},
+    plugins:{datalabels:{},legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},
+    scales:{x:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
+  });
+}
+
+function buildEstoque(){
+  const E=D.estoque;
+  const totalVal=E.reduce((s,e)=>s+e.val,0);
+  const giroMedio=Math.round(E.reduce((s,e)=>s+e.giro,0)/E.length);
+  const parados=E.filter(e=>e.giro>60).length;
+  document.getElementById('est-kpis').innerHTML=`
+    <div class="kpi-card ok">
+      <div class="kpi-label">Valor Total em Estoque</div>
+      <div class="kpi-value">${fmt(totalVal)}</div>
+      <div class="kpi-sub">Todas as categorias</div>
+    </div>
+    <div class="kpi-card in">
+      <div class="kpi-label">Giro Médio Geral</div>
+      <div class="kpi-value">${giroMedio} dias</div>
+      <div class="kpi-sub">Tempo médio de saída</div>
+    </div>
+    <div class="kpi-card ${parados>0?'wa':'ok'}">
+      <div class="kpi-label">Estoque Parado</div>
+      <div class="kpi-value">${parados} ${parados===1?'categoria':'categorias'}</div>
+      <div class="kpi-sub">Giro acima de 60 dias</div>
+    </div>`;
+  let h='<table><tr><th>Categoria</th><th>Valor em Estoque</th><th>Giro Médio</th><th>Cobertura</th><th>Status</th></tr>';
+  E.forEach(e=>{
+    let sc,sl;
+    if(e.giro<=30){sc='b-ok';sl='Normal';}
+    else if(e.giro<=60){sc='b-wa';sl='Atenção';}
+    else{sc='b-da';sl='Parado';}
+    h+=`<tr>
+      <td><strong>${e.n}</strong></td>
+      <td>${fmt(e.val)}</td>
+      <td>${e.giro} dias</td>
+      <td>${e.cob.toFixed(1)} meses</td>
+      <td><span class="badge ${sc}">${sl}</span></td>
+    </tr>`;
+  });
+  h+='</table>';
+  document.getElementById('est-tbl').innerHTML=h;
+}
+
+function mStat(m){ return m>=42?['b-exc','Excelente']:m>=36?['b-mok','OK']:['b-mal','Alerta']; }
+function estStatus(giro){ return giro<=30?['b-ok','Normal']:giro<=60?['b-wa','Atenção']:['b-da','Parado']; }
+function estColor(giro){ return giro<=30?'#2e7d32CC':giro<=60?'#e65100CC':'#c62828CC'; }
+
+function buildEstoqueTab(){
+  const E=D.estoque;
+  const totalVal=E.reduce((s,e)=>s+e.val,0);
+  const giroMedio=Math.round(E.reduce((s,e)=>s+e.giro,0)/E.length);
+  const parados=E.filter(e=>e.giro>60).length;
+  const valParado=E.filter(e=>e.giro>60).reduce((s,e)=>s+e.val,0);
+
+  document.getElementById('est2-kpis').innerHTML=`
+    <div class="kpi-card ok">
+      <div class="kpi-label">Valor Total em Estoque</div>
+      <div class="kpi-value">${fmt(totalVal)}</div>
+      <div class="kpi-sub">Todas as categorias</div>
+    </div>
+    <div class="kpi-card in">
+      <div class="kpi-label">Giro Médio Geral</div>
+      <div class="kpi-value">${giroMedio} dias</div>
+      <div class="kpi-sub">Tempo médio de saída</div>
+    </div>
+    <div class="kpi-card ${parados>0?'wa':'ok'}">
+      <div class="kpi-label">Categorias Paradas</div>
+      <div class="kpi-value">${parados}</div>
+      <div class="kpi-sub">Giro acima de 60 dias</div>
+    </div>
+    <div class="kpi-card da">
+      <div class="kpi-label">Valor Parado</div>
+      <div class="kpi-value">${fmt(valParado)}</div>
+      <div class="kpi-sub">Em categorias com giro &gt;60d</div>
+    </div>`;
+
+  mkChart('ch-est-bar',{type:'bar',data:{
+    labels:E.map(e=>e.n),
+    datasets:[{label:'Valor em Estoque',data:E.map(e=>e.val),
+      backgroundColor:E.map(e=>estColor(e.giro)),borderRadius:6,
+      datalabels:{...DL_BAR,formatter:(_,ctx)=>'R$'+(E[ctx.dataIndex].val/1000).toFixed(0)+'k\n'+E[ctx.dataIndex].giro+'d'}}]
+  },options:{responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:28}},
+    plugins:{datalabels:{},legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' — giro: '+E[c.dataIndex].giro+' dias'}}},
+    scales:{y:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
+  });
+
+  let h='<table><tr><th>Categoria</th><th>Valor em Estoque</th><th>Giro Médio</th><th>Cobertura</th><th>Itens Parados</th><th>Status</th><th></th></tr>';
+  E.forEach((e,i)=>{
+    const [sc,sl]=estStatus(e.giro);
+    const parad=e.produtos.filter(p=>p.giro>60).length;
+    h+=`<tr class="clickable" onclick="openEstoqueDrill(${i})">
+      <td><strong>${e.n}</strong></td>
+      <td>${fmt(e.val)}</td>
+      <td>${e.giro} dias</td>
+      <td>${e.cob.toFixed(1)} meses</td>
+      <td>${parad>0?`<span class="badge b-da">${parad} itens</span>`:'<span class="badge b-ok">0</span>'}</td>
+      <td><span class="badge ${sc}">${sl}</span></td>
+      <td style="color:var(--p);font-weight:600">${e.produtos.length} produtos ›</td>
+    </tr>`;
+  });
+  h+='</table>';
+  document.getElementById('est2-tbl').innerHTML=h;
+}
+
+function openEstoqueDrill(idx){
+  const e=D.estoque[idx];
+  document.getElementById('drill-est').classList.add('open');
+  document.getElementById('drill-est-title').textContent='📦 '+e.n+' — Produtos em Estoque';
+
+  const prods=[...e.produtos].sort((a,b)=>b.giro-a.giro);
+  const totalCat=prods.reduce((s,p)=>s+p.val,0);
+  const parados=prods.filter(p=>p.giro>60);
+  const valPar=parados.reduce((s,p)=>s+p.val,0);
+  const giroMed=Math.round(prods.reduce((s,p)=>s+p.giro,0)/prods.length);
+
+  document.getElementById('drill-est-kpis').innerHTML=`
+    <div class="kpi-card ok">
+      <div class="kpi-label">Valor na Categoria</div>
+      <div class="kpi-value">${fmt(totalCat)}</div>
+      <div class="kpi-sub">${prods.length} produtos</div>
+    </div>
+    <div class="kpi-card in">
+      <div class="kpi-label">Giro Médio</div>
+      <div class="kpi-value">${giroMed} dias</div>
+      <div class="kpi-sub">Nesta categoria</div>
+    </div>
+    <div class="kpi-card ${parados.length>0?'da':'ok'}">
+      <div class="kpi-label">Itens Parados</div>
+      <div class="kpi-value">${parados.length}</div>
+      <div class="kpi-sub">Giro &gt; 60 dias</div>
+    </div>
+    <div class="kpi-card ${valPar>0?'da':'ok'}">
+      <div class="kpi-label">Valor Parado</div>
+      <div class="kpi-value">${fmt(valPar)}</div>
+      <div class="kpi-sub">${pct(valPar,totalCat)} do estoque</div>
+    </div>`;
+
+  let h='<table><tr><th>Produto</th><th>Valor em Estoque</th><th>Part. %</th><th>Giro Médio</th><th>Status</th></tr>';
+  prods.forEach(p=>{
+    const [sc,sl]=estStatus(p.giro);
+    h+=`<tr>
+      <td><strong>${p.n}</strong></td>
+      <td>${fmt(p.val)}</td>
+      <td>${pct(p.val,totalCat)}</td>
+      <td>${p.giro} dias</td>
+      <td><span class="badge ${sc}">${sl}</span></td>
+    </tr>`;
+  });
+  h+='</table>';
+  document.getElementById('drill-est-tbl').innerHTML=h;
+  document.getElementById('drill-est').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function buildCatTable(){
+  const total=D.cats.reduce((s,c)=>s+c.fat,0);
+  let h='<table><tr><th>Categoria</th><th>Faturamento</th><th>Meta</th><th>Atingimento</th><th>Part.%</th><th>Margem</th><th>Status Margem</th></tr>';
+  D.cats.forEach(c=>{
+    const [mc,ml]=mStat(c.margem);
+    h+=`<tr><td><strong>${c.n}</strong></td><td>${fmt(c.fat)}</td><td>${fmt(c.meta)}</td><td>${badge(c.fat,c.meta)}</td><td>${pct(c.fat,total)}</td><td><strong>${c.margem}%</strong></td><td><span class="badge ${mc}">${ml}</span></td></tr>`;
+  });
+  h+='</table>';
+  document.getElementById('cat-tbl').innerHTML=h;
+}
+
+function buildRepTable(){
+  let h='<table><tr><th>#</th><th>Representante</th><th>Região</th><th>Clientes</th><th>Faturamento</th><th>Meta</th><th>Atingimento</th><th>Margem</th><th>Status</th></tr>';
+  D.reps.forEach((r,i)=>{
+    const [mc,ml]=mStat(r.margem);
+    h+=`<tr class="clickable" onclick="openRepDrill(${r.id})">
+      <td>${i+1}</td><td><strong>${r.nome}</strong></td><td>${r.reg}</td>
+      <td>${r.cli}</td><td>${fmt(r.fat)}</td><td>${fmt(r.meta)}</td>
+      <td>${badge(r.fat,r.meta)}</td>
+      <td><strong>${r.margem}%</strong></td><td><span class="badge ${mc}">${ml}</span></td>
+    </tr>`;
+  });
+  h+='</table>';
+  document.getElementById('rep-tbl').innerHTML=h;
+}
+
+function openRepDrill(id){
+  const r=D.reps.find(x=>x.id===id);
+  document.getElementById('drill-rep').classList.add('open');
+  document.getElementById('drill-rep-title').textContent='📊 '+r.nome+' — Detalhes';
+  document.getElementById('drill-cli-hd').textContent='Principais Clientes — '+r.nome;
+  mkChart('ch-d-men',{type:'bar',data:{labels:D.meses,datasets:[
+    {label:'Faturamento',data:r.fm,backgroundColor:'#007B8ECC',borderRadius:4,datalabels:DL_BAR},
+    {label:'Meta',data:r.mm,type:'line',borderColor:'#e65100',backgroundColor:'transparent',
+      borderWidth:2,pointRadius:3,tension:.3,datalabels:DL_OFF}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:22}},
+    plugins:{datalabels:{},legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},
+    scales:{y:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
+  });
+  mkChart('ch-d-cat',{type:'doughnut',data:{
+    labels:r.cats.map(c=>c.n),
+    datasets:[{data:r.cats.map(c=>c.fat),backgroundColor:CATS_C,borderWidth:0,datalabels:DL_PIE}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{datalabels:DL_PIE,legend:{position:'right'},tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)}}}}
+  });
+  // tabela de categorias com margem
+  const [dmc,dml]=mStat(r.margem);
+  document.getElementById('drill-rep-title').textContent='📊 '+r.nome+' — Margem: '+r.margem+'%';
+  let hc='<div style="margin-bottom:12px"><span class="badge '+dmc+'" style="font-size:13px;padding:5px 14px">Margem Geral: '+r.margem+'% — '+dml+'</span></div>';
+  hc+='<table style="margin-bottom:16px"><tr><th>Categoria</th><th>Faturamento</th><th>Margem</th><th>Status</th></tr>';
+  r.cats.forEach(c=>{ const [cc,cl]=mStat(c.margem); hc+=`<tr><td>${c.n}</td><td>${fmt(c.fat)}</td><td><strong>${c.margem}%</strong></td><td><span class="badge ${cc}">${cl}</span></td></tr>`; });
+  hc+='</table>';
+  document.getElementById('drill-cli-hd').innerHTML=hc+'<strong>Principais Clientes — '+r.nome+'</strong>';
+
+  let h='<table><tr><th>Cliente</th><th>Canal</th><th>Faturamento</th></tr>';
+  r.clis.forEach(c=>{ h+=`<tr><td>${c.n}</td><td><span class="badge b-ch">${c.c}</span></td><td>${fmt(c.fat)}</td></tr>`; });
+  h+='</table>';
+  document.getElementById('drill-cli-tbl').innerHTML=h;
+  document.getElementById('drill-rep').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function buildAllCli(){
+  const all=[];
+  D.reps.forEach(r=>r.clis.forEach(c=>all.push({...c,rep:r.nome})));
+  all.sort((a,b)=>b.fat-a.fat);
+  let h='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Representante</th><th>Faturamento</th></tr>';
+  all.slice(0,20).forEach((c,i)=>{
+    h+=`<tr><td>${i+1}</td><td><strong>${c.n}</strong></td>
+      <td><span class="badge b-ch">${c.c}</span></td><td>${c.rep}</td><td>${fmt(c.fat)}</td></tr>`;
+  });
+  h+='</table>';
+  document.getElementById('all-cli-tbl').innerHTML=h;
+}
+
+// ── REPRESENTANTE ─────────────────────────────────────────────
+function showRepSelect(){
+  show('rep-select-screen');
+  let h='<h3 style="margin-bottom:18px;color:var(--p);font-size:17px">Qual é o seu acesso?</h3>';
+  D.reps.forEach(r=>{
+    const p=ap(r.fat,r.meta), cls=p>=100?'b-ok':p>=85?'b-wa':'b-da';
+    h+=`<div class="rep-item" onclick="loginRep(${r.id})">
+      <div class="rep-av">${ini(r.nome)}</div>
+      <div class="rep-inf"><div class="rep-nm">${r.nome}</div><div class="rep-rg">${r.reg}</div></div>
+      <div style="text-align:right"><div class="rep-ft">${fmt(r.fat)}</div><span class="badge ${cls}">${p}%</span></div>
+    </div>`;
+  });
+  document.getElementById('rep-list').innerHTML=h;
+}
+
+function loginRep(id){
+  const r=D.reps.find(x=>x.id===id);
+  show('rep-screen');
+  document.getElementById('rep-hd-title').textContent='Golfinho Cosméticos · '+r.nome;
+  document.getElementById('rep-hd-sub').textContent=r.reg+' · '+D.mes;
+  document.getElementById('rep-screen').querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===0));
+  document.getElementById('rep-screen').querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  buildRepDash(r);
+}
+
+function buildRepDash(r){
+  const p=ap(r.fat,r.meta), pc=p>=100?'ok':p<80?'da':'';
+  document.getElementById('rep-kpis').innerHTML=`
+    <div class="kpi-card">
+      <div class="kpi-label">Faturamento Mês</div>
+      <div class="kpi-value">${fmt(r.fat)}</div>
+      <div class="kpi-sub">Meta: ${fmt(r.meta)}</div>
+      <div class="prog"><div class="prog-fill ${pc}" style="width:${Math.min(100,p)}%"></div></div>
+    </div>
+    <div class="kpi-card ac">
+      <div class="kpi-label">Atingimento</div>
+      <div class="kpi-value">${p}%</div>
+      <div class="kpi-sub">${D.mes}</div>
+    </div>
+    <div class="kpi-card ok">
+      <div class="kpi-label">Clientes Ativos</div>
+      <div class="kpi-value">${r.cli}</div>
+      <div class="kpi-sub">Carteira</div>
+    </div>
+    <div class="kpi-card wa">
+      <div class="kpi-label">Falta para Meta</div>
+      <div class="kpi-value">${fmt(Math.max(0,r.meta-r.fat))}</div>
+      <div class="kpi-sub">Este mês</div>
+    </div>
+    <div class="kpi-card" style="border-left-color:${r.margem>=42?'#2e7d32':r.margem>=36?'#007B8E':'#e65100'}">
+      <div class="kpi-label">Minha Margem</div>
+      <div class="kpi-value">${r.margem}%</div>
+      <div class="kpi-sub">Meta: 40% &nbsp;<span class="badge ${mStat(r.margem)[0]}">${mStat(r.margem)[1]}</span></div>
+    </div>`;
+
+  mkChart('ch-r-ring',{type:'doughnut',data:{
+    labels:['Realizado','A Atingir'],
+    datasets:[{data:[r.fat,Math.max(0,r.meta-r.fat)],backgroundColor:['#007B8E','#B2EBF2'],borderWidth:0,datalabels:DL_PIE}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'70%',
+      plugins:{datalabels:DL_PIE,legend:{position:'bottom'},tooltip:{callbacks:{label:c=>fmt(c.raw)}}}}
+  });
+  mkChart('ch-r-men',{type:'bar',data:{labels:D.meses,datasets:[
+    {label:'Faturamento',data:r.fm,backgroundColor:'#007B8ECC',borderRadius:4,datalabels:DL_BAR},
+    {label:'Meta',data:r.mm,type:'line',borderColor:'#e65100',backgroundColor:'transparent',
+      borderWidth:2,pointRadius:4,tension:.3,datalabels:DL_OFF}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:22}},
+    plugins:{datalabels:{},legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},
+    scales:{y:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
+  });
+  mkChart('ch-r-cat',{type:'bar',data:{labels:r.cats.map(c=>c.n),datasets:[
+    {label:'Faturamento',data:r.cats.map(c=>c.fat),backgroundColor:CATS_C,borderRadius:5,
+      datalabels:{...DL_BARH,formatter:(v,ctx)=>'R$'+(v/1000).toFixed(0)+'k ('+pct(v,r.fat)+')'}}
+  ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    layout:{padding:{right:80}},
+    plugins:{datalabels:{},legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' ('+pct(c.raw,r.fat)+')'}}},
+    scales:{x:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
+  });
+
+  // tabela de categorias com margem (aba Categorias do representante)
+  let hcat='<div style="overflow-x:auto"><table><tr><th>Categoria</th><th>Faturamento</th><th>Part.%</th><th>Margem</th><th>Status</th></tr>';
+  r.cats.forEach(c=>{ const [cc,cl]=mStat(c.margem); hcat+=`<tr><td><strong>${c.n}</strong></td><td>${fmt(c.fat)}</td><td>${pct(c.fat,r.fat)}</td><td><strong>${c.margem}%</strong></td><td><span class="badge ${cc}">${cl}</span></td></tr>`; });
+  hcat+='</table></div>';
+  document.getElementById('rep-tab-rcat').insertAdjacentHTML('beforeend','<div style="margin-top:18px">'+hcat+'</div>');
+
+  document.getElementById('rep-cli-hd').textContent='Seus Principais Clientes';
+  let h='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Faturamento</th></tr>';
+  r.clis.forEach((c,i)=>{
+    h+=`<tr><td>${i+1}</td><td><strong>${c.n}</strong></td><td><span class="badge b-ch">${c.c}</span></td><td>${fmt(c.fat)}</td></tr>`;
+  });
+  h+='</table>';
+  document.getElementById('rep-cli-tbl').innerHTML=h;
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+show('login-screen');
+</script>
+</body>
+</html>
