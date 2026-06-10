@@ -159,6 +159,19 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
   margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--bd);
 }
 
+/* DRE TABLE */
+.dre-tbl table{width:100%;border-collapse:collapse;}
+.dre-tbl th{background:var(--p);color:#fff;padding:11px 16px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;text-align:left;}
+.dre-tbl td{padding:10px 16px;border-bottom:1px solid #E0F7FA;font-size:13px;}
+.dre-tbl tr.sub td{background:#E0F7FA;font-weight:700;font-size:14px;}
+.dre-tbl tr.res td{background:#C8E6C9;font-weight:700;font-size:14px;color:#1B5E20;}
+.dre-tbl tr.res-neg td{background:#FFEBEE;font-weight:700;font-size:14px;color:#B71C1C;}
+.dre-tbl tr.ded td{color:#555;}
+.dre-tbl tr.cus td{background:#FFF8E1;}
+.dre-tbl tr.imp td{color:#666;}
+.dre-tbl tr.sep td{border-top:2px solid var(--p);padding-top:12px;}
+.dre-pct{font-size:12px;color:var(--mu);}
+
 /* FILTER BAR */
 .filter-bar{
   background:#fff;border-bottom:1px solid var(--bd);
@@ -235,6 +248,7 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
     <button class="tab-btn"        onclick="setTab(this,'dir','reps')">Representantes</button>
     <button class="tab-btn"        onclick="setTab(this,'dir','cli')">Clientes</button>
     <button class="tab-btn"        onclick="setTab(this,'dir','estoque')">📦 Estoque</button>
+    <button class="tab-btn"        onclick="setTab(this,'dir','dre')">📊 DRE</button>
   </div>
   <div class="filter-bar">
     <div class="filter-group">
@@ -342,6 +356,25 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
         <div class="kpi-grid" id="drill-est-kpis" style="margin-bottom:16px"></div>
         <div class="table-wrap" id="drill-est-tbl"></div>
       </div>
+    </div>
+
+    <div id="dir-tab-dre" class="tab-panel">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">
+        <div class="sec-hd" style="margin:0;border:none">Demonstração do Resultado</div>
+        <span class="filter-tag" id="dre-periodo-tag"></span>
+      </div>
+      <div class="kpi-grid" id="dre-kpis"></div>
+      <div class="chart-grid" style="margin-bottom:20px">
+        <div class="chart-card">
+          <div class="chart-title">Composição da Receita Líquida (%)</div>
+          <div class="ch"><canvas id="ch-dre-pizza"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Lucro Líquido Mensal (R$)</div>
+          <div class="ch"><canvas id="ch-dre-ll"></canvas></div>
+        </div>
+      </div>
+      <div class="dre-tbl" id="dre-tbl"></div>
     </div>
 
   </div>
@@ -578,7 +611,7 @@ function computeFD(){
 
 function applyFilters(){
   computeFD();
-  buildDirKPIs(); buildDirCharts(); buildCatTable(); buildRepTable(); buildAllCli();
+  buildDirKPIs(); buildDirCharts(); buildCatTable(); buildRepTable(); buildAllCli(); buildDRE();
   document.getElementById('dir-sub').textContent = (FD.todos?FD.mesLabel:FD.mesLabel+'/2026')+' · '+FD.lojaLabel;
   document.getElementById('drill-rep').classList.remove('open');
 }
@@ -605,7 +638,7 @@ function loginDiretoria(){
   show('app-screen');
   computeFD();
   document.getElementById('dir-sub').textContent = (FD.todos?FD.mesLabel:FD.mesLabel+'/2026')+' · '+FD.lojaLabel;
-  buildDirKPIs(); buildDirCharts(); buildRepTable(); buildAllCli(); buildCatTable(); buildEstoqueTab();
+  buildDirKPIs(); buildDirCharts(); buildRepTable(); buildAllCli(); buildCatTable(); buildEstoqueTab(); buildDRE();
 }
 
 function buildDirKPIs(){
@@ -733,6 +766,146 @@ function buildEstoque(){
 }
 
 function mStat(m){ return m>=42?['b-exc','Excelente']:m>=36?['b-mok','OK']:['b-mal','Alerta']; }
+
+// Estrutura percentual do DRE anual (aplicada mensalmente)
+const DRE_PCT = {
+  rb_mult: 104.09/100,   // Receita Bruta = RL × 1.0409
+  devolucoes: 1.48/100,  // sobre RB
+  impostos:   2.62/100,  // sobre RB
+  descontos:  0.0001,    // irrelevante
+  cmv:        78.19/100, // sobre RL
+  desp_vend:  6.28/100,
+  desp_adm:   2.32/100,
+  desp_fin:   1.64/100,
+  res_fin:   -0.35/100,
+  desp_nop:   0.39/100,
+  irpj:       3.25/100,
+  lucro_liq:  7.59/100
+};
+
+function calcDRE(rl){
+  const rb  = rl * DRE_PCT.rb_mult;
+  const dev = rb * DRE_PCT.devolucoes;
+  const imp = rb * DRE_PCT.impostos;
+  const desc= rb * DRE_PCT.descontos;
+  const cmv = rl * DRE_PCT.cmv;
+  const lb  = rl - cmv;
+  const dv  = rl * DRE_PCT.desp_vend;
+  const da  = rl * DRE_PCT.desp_adm;
+  const df  = rl * DRE_PCT.desp_fin;
+  const rf  = rl * DRE_PCT.res_fin;
+  const dno = rl * DRE_PCT.desp_nop;
+  const lo  = lb - dv - da - df + rf - dno;
+  const irpj= rl * DRE_PCT.irpj;
+  const ll  = lo - irpj;
+  return {rb,dev,imp,desc,rl,cmv,lb,dv,da,df,rf,dno,lo,irpj,ll};
+}
+
+const fmtM = v => {
+  const s = v < 0 ? '-' : '';
+  return s+'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+};
+const fpct = v => (v>=0?'+':'')+v.toFixed(2)+'%';
+
+function buildDRE(){
+  const rl = FD.todos ? FD.kpis.fat_ano : FD.kpis.fat_mes;
+  const d  = calcDRE(rl);
+  const periodo = FD.todos ? 'Jan–Jun/2026' : FD.mesLabel+'/2026';
+  document.getElementById('dre-periodo-tag').textContent = periodo+' · '+FD.lojaLabel;
+
+  // KPIs
+  const [mc,ml]=mStat(d.lb/d.rl*100);
+  const llpct = (d.ll/d.rl*100).toFixed(2);
+  document.getElementById('dre-kpis').innerHTML=`
+    <div class="kpi-card ok">
+      <div class="kpi-label">Receita Líquida</div>
+      <div class="kpi-value" style="font-size:18px">${fmtM(d.rl)}</div>
+      <div class="kpi-sub">Base: 100%</div>
+    </div>
+    <div class="kpi-card ${mc}">
+      <div class="kpi-label">Lucro Bruto</div>
+      <div class="kpi-value">${(d.lb/d.rl*100).toFixed(2)}%</div>
+      <div class="kpi-sub">${fmtM(d.lb)} &nbsp;<span class="badge ${mc}">${ml}</span></div>
+    </div>
+    <div class="kpi-card in">
+      <div class="kpi-label">Lucro Operacional</div>
+      <div class="kpi-value">${(d.lo/d.rl*100).toFixed(2)}%</div>
+      <div class="kpi-sub">${fmtM(d.lo)}</div>
+    </div>
+    <div class="kpi-card ${parseFloat(llpct)>=7?'ok':'wa'}">
+      <div class="kpi-label">Lucro Líquido</div>
+      <div class="kpi-value">${llpct}%</div>
+      <div class="kpi-sub">${fmtM(d.ll)}</div>
+    </div>
+    <div class="kpi-card da">
+      <div class="kpi-label">CMV</div>
+      <div class="kpi-value">${(d.cmv/d.rl*100).toFixed(2)}%</div>
+      <div class="kpi-sub">${fmtM(d.cmv)}</div>
+    </div>`;
+
+  // Pizza: composição da RL
+  mkChart('ch-dre-pizza',{type:'pie',data:{
+    labels:['CMV','Desp. Vendas','Desp. Admin','Desp. Financeiras','IRPJ/CSLL','Lucro Líquido'],
+    datasets:[{
+      data:[78.19,6.28,2.32,1.99,3.25,7.59],
+      backgroundColor:['#c62828CC','#e65100CC','#1565C0CC','#7B1FA2CC','#757575CC','#2e7d32CC'],
+      borderWidth:0,
+      datalabels:{
+        formatter:(v,ctx)=>ctx.chart.data.labels[ctx.dataIndex].split(' ')[0]+'\n'+v+'%',
+        color:'#fff',font:{size:10,weight:'bold'}
+      }
+    }]
+  },options:{responsive:true,maintainAspectRatio:false,
+    plugins:{datalabels:{},legend:{position:'right'},
+      tooltip:{callbacks:{label:c=>c.label+': '+c.raw+'% da RL'}}}}
+  });
+
+  // Lucro Líquido mensal (linha)
+  const llMensal = FD.fat_m.map(v => Math.round(v * DRE_PCT.lucro_liq));
+  mkChart('ch-dre-ll',{type:'bar',data:{labels:FD.meses_shown,datasets:[
+    {label:'Lucro Líquido',data:llMensal,
+      backgroundColor:llMensal.map(v=>v>=0?'#2e7d32CC':'#c62828CC'),
+      borderRadius:5,
+      datalabels:{anchor:'end',align:'top',formatter:v=>'R$'+(v/1000).toFixed(0)+'k',font:{size:9,weight:'bold'},color:'#1a2e30'}}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:22}},
+    plugins:{datalabels:{},legend:{display:false},
+      tooltip:{callbacks:{label:c=>fmtM(c.raw)}}},
+    scales:{y:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
+  });
+
+  // Tabela DRE
+  const rows = [
+    {n:'Receita Bruta de Vendas',                 v:d.rb,   tp:''},
+    {n:'(-) Devoluções / Cancelamentos',           v:-d.dev, tp:'ded'},
+    {n:'(-) Impostos sobre Vendas',                v:-d.imp, tp:'ded'},
+    {n:'(-) Descontos',                            v:-d.desc,tp:'ded'},
+    {n:'Receita Líquida',                          v:d.rl,   tp:'sub'},
+    {n:'(-) CMV / Custos das Mercadorias',         v:-d.cmv, tp:'cus sep'},
+    {n:'Lucro Bruto',                              v:d.lb,   tp:'res'},
+    {n:'(-) Despesas com Vendas',                  v:-d.dv,  tp:'ded sep'},
+    {n:'(-) Despesas Administrativas',             v:-d.da,  tp:'ded'},
+    {n:'(-) Despesas Financeiras',                 v:-d.df,  tp:'ded'},
+    {n:'(+/-) Resultado Financeiro Líquido',       v:d.rf,   tp:'ded'},
+    {n:'(-) Despesas Não Operacionais',            v:-d.dno, tp:'ded'},
+    {n:'Lucro Operacional Estimado',               v:d.lo,   tp:'res'},
+    {n:'(-) IRPJ / CSLL',                         v:-d.irpj,tp:'imp sep'},
+    {n:'Lucro Líquido Estimado',                   v:d.ll,   tp: d.ll>=0?'res':'res-neg'}
+  ];
+
+  let h='<table><tr><th>Conta</th><th style="text-align:right">Valor (R$)</th><th style="text-align:right">% Rec. Líquida</th></tr>';
+  rows.forEach(r=>{
+    const pctVal = (Math.abs(r.v)/d.rl*100).toFixed(2);
+    const sinal = r.v < 0 ? '-' : '';
+    h+=`<tr class="${r.tp}">
+      <td>${r.n}</td>
+      <td style="text-align:right;font-variant-numeric:tabular-nums">${sinal}${fmtM(Math.abs(r.v)).replace('R$ ','R$&nbsp;')}</td>
+      <td style="text-align:right" class="dre-pct">${sinal}${pctVal}%</td>
+    </tr>`;
+  });
+  h+='</table>';
+  document.getElementById('dre-tbl').innerHTML=h;
+}
 function estStatus(giro){ return giro<=30?['b-ok','Normal']:giro<=60?['b-wa','Atenção']:['b-da','Parado']; }
 function estColor(giro){ return giro<=30?'#2e7d32CC':giro<=60?'#e65100CC':'#c62828CC'; }
 
