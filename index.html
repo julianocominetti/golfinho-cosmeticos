@@ -240,6 +240,7 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
     <div class="filter-group">
       <span class="filter-label">Mês</span>
       <select class="filter-select" id="sel-mes" onchange="applyFilters()">
+        <option value="todos">Todos os Meses</option>
         <option value="0">Janeiro</option>
         <option value="1">Fevereiro</option>
         <option value="2">Março</option>
@@ -526,49 +527,62 @@ function mkChart(id,cfg){
 let FD = {};
 
 function computeFD(){
-  const mes  = parseInt(document.getElementById('sel-mes').value);
-  const loja = document.getElementById('sel-loja').value;
+  const mesVal = document.getElementById('sel-mes').value;
+  const loja   = document.getElementById('sel-loja').value;
+  const todos  = mesVal === 'todos';
+  const mes    = todos ? 5 : parseInt(mesVal);
   const lojaNames = {todas:'Todas as Lojas',pb:'Pato Branco — Matriz',fb:'Francisco Beltrão — Filial',cpo:'Chapecó — Filial SC'};
 
   const reps = loja === 'todas' ? D.reps : D.reps.filter(r => r.loja === loja);
-  const allFatJun = D.reps.reduce((s,r) => s + r.fat, 0);
+  const allFatJun  = D.reps.reduce((s,r) => s + r.fat, 0);
   const filtFatJun = reps.reduce((s,r) => s + r.fat, 0);
-  const lojaRatio = filtFatJun / allFatJun;
+  const lojaRatio  = filtFatJun / allFatJun;
 
-  const fat_mes  = reps.reduce((s,r) => s + r.fm[mes], 0);
-  const meta_mes = reps.reduce((s,r) => s + r.mm[mes], 0);
-  const fat_ano  = reps.reduce((s,r) => s + r.fm.slice(0,mes+1).reduce((a,b)=>a+b,0), 0);
-  const meta_ano = reps.reduce((s,r) => s + r.mm.slice(0,mes+1).reduce((a,b)=>a+b,0), 0);
+  const meses_shown = todos ? D.meses : D.meses.slice(0, mes+1);
+  const fat_m  = meses_shown.map((_,i) => reps.reduce((s,r) => s + r.fm[i], 0));
+  const meta_m = meses_shown.map((_,i) => reps.reduce((s,r) => s + r.mm[i], 0));
+  const margem_m = todos ? D.margem_m : D.margem_m.slice(0, mes+1);
+
+  const fat_mes  = todos ? fat_m.reduce((a,b)=>a+b,0)  : fat_m[fat_m.length-1];
+  const meta_mes = todos ? meta_m.reduce((a,b)=>a+b,0) : meta_m[meta_m.length-1];
+  const fat_ano  = fat_m.reduce((a,b)=>a+b,0);
+  const meta_ano = meta_m.reduce((a,b)=>a+b,0);
+  const margem   = todos
+    ? Math.round((D.margem_m.reduce((a,b)=>a+b,0)/D.margem_m.length)*10)/10
+    : D.margem_m[mes];
+
+  const mesLabel = todos ? 'Jan–Jun' : D.meses[mes];
 
   FD = {
-    mesLabel: D.meses[mes], mesIdx: mes, loja, lojaLabel: lojaNames[loja], lojaRatio,
+    mesLabel, mesIdx: todos ? -1 : mes, todos, loja, lojaLabel: lojaNames[loja], lojaRatio,
     kpis: {
       fat_mes, meta_mes, fat_ano, meta_ano,
       ticket: D.kpis.ticket,
       cli_ativos: Math.round(D.kpis.cli_ativos * lojaRatio),
-      novos: Math.round(D.kpis.novos * lojaRatio),
-      margem: D.margem_m[mes], margem_meta: 40
+      novos: Math.round(D.kpis.novos * lojaRatio * (todos ? D.meses.length : 1)),
+      margem, margem_meta: 40
     },
-    meses_shown: D.meses.slice(0, mes+1),
-    fat_m:    D.meses.slice(0,mes+1).map((_,i) => reps.reduce((s,r) => s + r.fm[i], 0)),
-    meta_m:   D.meses.slice(0,mes+1).map((_,i) => reps.reduce((s,r) => s + r.mm[i], 0)),
-    margem_m: D.margem_m.slice(0, mes+1),
-    cats:   D.cats.map(c => ({...c, fat: Math.round(c.fat * lojaRatio), meta: Math.round(c.meta * lojaRatio)})),
-    canais: D.canais.map(c => ({...c, fat: Math.round(c.fat * lojaRatio)})),
-    reps: reps.map(r => ({
-      ...r,
-      fat: r.fm[mes], meta: r.mm[mes],
-      cats: r.cats.map(c => ({...c, fat: Math.round(c.fat * (r.fat>0 ? r.fm[mes]/r.fat : 1))}))
-    }))
+    meses_shown, fat_m, meta_m, margem_m,
+    cats:   D.cats.map(c => ({...c,
+      fat:  Math.round(c.fat  * lojaRatio * (todos ? D.meses.length/1 : D.fat_m[mes]/D.fat_m[5])),
+      meta: Math.round(c.meta * lojaRatio * (todos ? D.meses.length/1 : D.fat_m[mes]/D.fat_m[5]))
+    })),
+    canais: D.canais.map(c => ({...c, fat: Math.round(c.fat * lojaRatio * (todos ? D.meses.length/1 : D.fat_m[mes]/D.fat_m[5]))})),
+    reps: reps.map(r => {
+      const rFat  = todos ? r.fm.reduce((a,b)=>a+b,0)  : r.fm[mes];
+      const rMeta = todos ? r.mm.reduce((a,b)=>a+b,0)  : r.mm[mes];
+      const scale = r.fat > 0 ? rFat / r.fat : 1;
+      return { ...r, fat: rFat, meta: rMeta, cats: r.cats.map(c => ({...c, fat: Math.round(c.fat * scale)})) };
+    })
   };
 
-  document.getElementById('filter-tag').textContent = FD.mesLabel+'/2026 · '+FD.lojaLabel;
+  document.getElementById('filter-tag').textContent = FD.mesLabel+(todos?'':'/2026')+' · '+FD.lojaLabel;
 }
 
 function applyFilters(){
   computeFD();
   buildDirKPIs(); buildDirCharts(); buildCatTable(); buildRepTable(); buildAllCli();
-  document.getElementById('dir-sub').textContent = FD.mesLabel+'/2026 · '+FD.lojaLabel;
+  document.getElementById('dir-sub').textContent = (FD.todos?FD.mesLabel:FD.mesLabel+'/2026')+' · '+FD.lojaLabel;
   document.getElementById('drill-rep').classList.remove('open');
 }
 
@@ -593,7 +607,7 @@ function setTab(btn,prefix,name){
 function loginDiretoria(){
   show('app-screen');
   computeFD();
-  document.getElementById('dir-sub').textContent = FD.mesLabel+'/2026 · '+FD.lojaLabel;
+  document.getElementById('dir-sub').textContent = (FD.todos?FD.mesLabel:FD.mesLabel+'/2026')+' · '+FD.lojaLabel;
   buildDirKPIs(); buildDirCharts(); buildRepTable(); buildAllCli(); buildCatTable(); buildEstoque(); buildEstoqueTab();
 }
 
