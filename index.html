@@ -159,6 +159,24 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
   margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--bd);
 }
 
+/* ALERTAS */
+.alert-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px;}
+.alert-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,123,142,.08);}
+.alert-card-hd{padding:13px 16px;display:flex;align-items:center;gap:10px;}
+.alert-card-hd h4{font-size:14px;font-weight:700;color:#fff;margin:0;flex:1;}
+.alert-card-hd .cnt{background:rgba(255,255,255,.25);color:#fff;font-weight:700;font-size:12px;padding:2px 9px;border-radius:20px;}
+.alert-card-body{padding:4px 16px 8px;}
+.al-item{padding:11px 0;border-bottom:1px solid #f4f4f4;}
+.al-item:last-child{border-bottom:none;}
+.al-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.al-nm{font-weight:600;font-size:13px;color:var(--txt);}
+.al-sub{font-size:12px;color:var(--mu);margin-bottom:5px;}
+.al-acoes{list-style:none;padding:0;margin:0;}
+.al-acoes li{font-size:12px;color:#444;margin-bottom:3px;padding-left:16px;position:relative;}
+.al-acoes li::before{content:'→';position:absolute;left:0;color:var(--p);font-weight:700;}
+.al-vazio{color:#2e7d32;font-weight:600;padding:12px 0;font-size:13px;}
+@media(max-width:700px){.alert-grid{grid-template-columns:1fr;}}
+
 /* DRE TABLE */
 .dre-tbl table{width:100%;border-collapse:collapse;}
 .dre-tbl th{background:var(--p);color:#fff;padding:11px 16px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;text-align:left;}
@@ -331,6 +349,8 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
           <div class="table-wrap" id="drill-cli-tbl"></div>
         </div>
       </div>
+      <div class="sec-hd" style="margin-top:24px">🚨 Alertas & Ações</div>
+      <div id="alertas-section"></div>
     </div>
 
     <div id="dir-tab-cli" class="tab-panel">
@@ -438,11 +458,11 @@ const D = {
   meta_m:   [1065000,1105000,1150000,1185000,1245000,1335000],
   margem_m: [36.2, 37.1, 38.4, 39.1, 38.8, 38.5],
   cats: [
-    {n:'Cosméticos/Maquiagem', fat:352000, meta:370000, margem:44},
-    {n:'Cabelos',              fat:308000, meta:330000, margem:41},
-    {n:'Perfumaria',           fat:251000, meta:255000, margem:38},
-    {n:'Higiene Pessoal',      fat:184000, meta:190000, margem:35},
-    {n:'Profissional',         fat:145000, meta:190000, margem:29}
+    {n:'Cosméticos/Maquiagem', fat:352000, meta:370000, margem:44, tend:+4},
+    {n:'Cabelos',              fat:308000, meta:330000, margem:41, tend:+2},
+    {n:'Perfumaria',           fat:251000, meta:255000, margem:38, tend:-3},
+    {n:'Higiene Pessoal',      fat:184000, meta:190000, margem:35, tend:-1},
+    {n:'Profissional',         fat:145000, meta:190000, margem:29, tend:-8}
   ],
   canais: [
     {n:'Atacado',fat:590000},{n:'Varejo',fat:403000},{n:'Profissional',fat:247000}
@@ -502,7 +522,7 @@ const D = {
     { id:1, nome:'Fernanda Oliveira', reg:'Pato Branco/PR', fat:252000, meta:260000, cli:68, margem:40, loja:'pb',
       fm:[199000,207000,219000,227000,235000,252000], mm:[210000,220000,228000,236000,245000,260000],
       cats:[{n:'Cosméticos/Maquiagem',fat:80000,margem:43},{n:'Cabelos',fat:63000,margem:40},{n:'Perfumaria',fat:50000,margem:39},{n:'Higiene Pessoal',fat:36000,margem:35},{n:'Profissional',fat:23000,margem:28}],
-      clis:[{n:'Farmácia Bem Estar',fat:47000,c:'Atacado'},{n:'Salão Glamour',fat:36000,c:'Profissional'},{n:'Perfumaria Bella',fat:33000,c:'Varejo'},{n:'Mercado Central',fat:29000,c:'Atacado'},{n:'Ótica Fashion',fat:25000,c:'Varejo'},{n:'Studio Beleza Total',fat:23000,c:'Profissional'},{n:'Drogaria Nortão',fat:20000,c:'Atacado'},{n:'Empório da Beleza',fat:18000,c:'Varejo'}]
+      clis:[{n:'Farmácia Bem Estar',fat:47000,c:'Atacado'},{n:'Salão Glamour',fat:36000,c:'Profissional'},{n:'Perfumaria Bella',fat:33000,c:'Varejo'},{n:'Mercado Central',fat:29000,c:'Atacado'},{n:'Ótica Fashion',fat:25000,c:'Varejo'},{n:'Studio Beleza Total',fat:23000,c:'Profissional'},{n:'Drogaria Nortão',fat:20000,c:'Atacado',dias:34},{n:'Empório da Beleza',fat:18000,c:'Varejo',dias:28}]
     },
     { id:2, nome:'Camila Santos', reg:'Chapecó/SC', fat:286000, meta:280000, cli:74, margem:43, loja:'cpo',
       fm:[210000,228000,241000,255000,272000,286000], mm:[222000,232000,244000,256000,270000,280000],
@@ -512,17 +532,17 @@ const D = {
     { id:3, nome:'Ricardo Borges', reg:'Francisco Beltrão/PR', fat:227000, meta:240000, cli:61, margem:37, loja:'fb',
       fm:[179000,185000,196000,205000,216000,227000], mm:[192000,200000,208000,218000,230000,240000],
       cats:[{n:'Cosméticos/Maquiagem',fat:63000,margem:41},{n:'Cabelos',fat:58000,margem:38},{n:'Perfumaria',fat:49000,margem:36},{n:'Higiene Pessoal',fat:36000,margem:33},{n:'Profissional',fat:21000,margem:27}],
-      clis:[{n:'Farmácia Popular',fat:49000,c:'Atacado'},{n:'Bazar da Beleza',fat:40000,c:'Varejo'},{n:'Mercadinho São José',fat:34000,c:'Atacado'},{n:'Depósito Cosméticos',fat:30000,c:'Atacado'},{n:'Loja das Fragrâncias',fat:23000,c:'Varejo'},{n:'Salão Belo Corte',fat:21000,c:'Profissional'},{n:'Perfumaria Chique',fat:18000,c:'Varejo'},{n:'Mercado Boa Vista',fat:12000,c:'Atacado'}]
+      clis:[{n:'Farmácia Popular',fat:49000,c:'Atacado'},{n:'Bazar da Beleza',fat:40000,c:'Varejo'},{n:'Mercadinho São José',fat:34000,c:'Atacado'},{n:'Depósito Cosméticos',fat:30000,c:'Atacado'},{n:'Loja das Fragrâncias',fat:23000,c:'Varejo'},{n:'Salão Belo Corte',fat:21000,c:'Profissional'},{n:'Perfumaria Chique',fat:18000,c:'Varejo',dias:41},{n:'Mercado Boa Vista',fat:12000,c:'Atacado',dias:53}]
     },
     { id:4, nome:'Patrícia Lima', reg:'Dois Vizinhos/PR', fat:268000, meta:255000, cli:71, margem:41, loja:'pb',
       fm:[200000,213000,225000,239000,251000,268000], mm:[208000,218000,228000,242000,256000,255000],
       cats:[{n:'Cosméticos/Maquiagem',fat:83000,margem:44},{n:'Cabelos',fat:72000,margem:41},{n:'Perfumaria',fat:58000,margem:39},{n:'Higiene Pessoal',fat:36000,margem:36},{n:'Profissional',fat:19000,margem:29}],
-      clis:[{n:'Drogaria Nobre',fat:63000,c:'Atacado'},{n:'Salão Princesa',fat:51000,c:'Profissional'},{n:'Perfumaria Elite',fat:44000,c:'Varejo'},{n:'Empório Beleza',fat:41000,c:'Varejo'},{n:'Studio Hair Pro',fat:32000,c:'Profissional'},{n:'Farmácia Dois Vizinhos',fat:26000,c:'Atacado'},{n:'Loja Cosméticos & Mais',fat:23000,c:'Varejo'},{n:'Bazar Tudo Belo',fat:18000,c:'Varejo'}]
+      clis:[{n:'Drogaria Nobre',fat:63000,c:'Atacado'},{n:'Salão Princesa',fat:51000,c:'Profissional'},{n:'Perfumaria Elite',fat:44000,c:'Varejo'},{n:'Empório Beleza',fat:41000,c:'Varejo'},{n:'Studio Hair Pro',fat:32000,c:'Profissional'},{n:'Farmácia Dois Vizinhos',fat:26000,c:'Atacado'},{n:'Loja Cosméticos & Mais',fat:23000,c:'Varejo'},{n:'Bazar Tudo Belo',fat:18000,c:'Varejo',dias:31}]
     },
     { id:5, nome:'André Costa', reg:'Palmas/PR', fat:207000, meta:308000, cli:38, margem:32, loja:'fb',
       fm:[192000,187000,199000,194000,189000,207000], mm:[250000,262000,272000,284000,295000,308000],
       cats:[{n:'Cosméticos/Maquiagem',fat:29000,margem:36},{n:'Cabelos',fat:39000,margem:33},{n:'Perfumaria',fat:37000,margem:30},{n:'Higiene Pessoal',fat:40000,margem:31},{n:'Profissional',fat:62000,margem:26}],
-      clis:[{n:'Farmácia Vida',fat:42000,c:'Atacado'},{n:'Bazar Mix',fat:33000,c:'Varejo'},{n:'Mercado Bom Preço',fat:29000,c:'Atacado'},{n:'Loja Beleza & Cia',fat:27000,c:'Varejo'},{n:'Salão Corte & Arte',fat:22000,c:'Profissional'},{n:'Farmácia Palmas',fat:19000,c:'Atacado'},{n:'Beauty Mix',fat:17000,c:'Varejo'},{n:'Empório do Bem',fat:17000,c:'Varejo'}]
+      clis:[{n:'Farmácia Vida',fat:42000,c:'Atacado'},{n:'Bazar Mix',fat:33000,c:'Varejo'},{n:'Mercado Bom Preço',fat:29000,c:'Atacado'},{n:'Loja Beleza & Cia',fat:27000,c:'Varejo'},{n:'Salão Corte & Arte',fat:22000,c:'Profissional'},{n:'Farmácia Palmas',fat:19000,c:'Atacado'},{n:'Beauty Mix',fat:17000,c:'Varejo',dias:44},{n:'Empório do Bem',fat:17000,c:'Varejo',dias:38}]
     }
   ]
 };
@@ -611,7 +631,7 @@ function computeFD(){
 
 function applyFilters(){
   computeFD();
-  buildDirKPIs(); buildDirCharts(); buildCatTable(); buildRepTable(); buildAllCli(); buildDRE();
+  buildDirKPIs(); buildDirCharts(); buildCatTable(); buildRepTable(); buildAllCli(); buildDRE(); buildAlertas();
   document.getElementById('dir-sub').textContent = (FD.todos?FD.mesLabel:FD.mesLabel+'/2026')+' · '+FD.lojaLabel;
   document.getElementById('drill-rep').classList.remove('open');
 }
@@ -638,7 +658,7 @@ function loginDiretoria(){
   show('app-screen');
   computeFD();
   document.getElementById('dir-sub').textContent = (FD.todos?FD.mesLabel:FD.mesLabel+'/2026')+' · '+FD.lojaLabel;
-  buildDirKPIs(); buildDirCharts(); buildRepTable(); buildAllCli(); buildCatTable(); buildEstoqueTab(); buildDRE();
+  buildDirKPIs(); buildDirCharts(); buildRepTable(); buildAllCli(); buildCatTable(); buildEstoqueTab(); buildDRE(); buildAlertas();
 }
 
 function buildDirKPIs(){
@@ -931,6 +951,113 @@ function buildDRE(){
 }
 function estStatus(giro){ return giro<=30?['b-ok','Normal']:giro<=60?['b-wa','Atenção']:['b-da','Parado']; }
 function estColor(giro){ return giro<=30?'#2e7d32CC':giro<=60?'#e65100CC':'#c62828CC'; }
+
+function buildAlertas(){
+  const el = document.getElementById('alertas-section');
+  if(!el) return;
+
+  // 1. Meta em risco
+  const metaAlerts = FD.reps.filter(r=>ap(r.fat,r.meta)<100).sort((a,b)=>ap(a.fat,a.meta)-ap(b.fat,b.meta));
+
+  // 2. Margem abaixo de 40%
+  const margAlerts = FD.reps.filter(r=>r.margem<40).sort((a,b)=>a.margem-b.margem);
+
+  // 3. Clientes inativos (dias sem compra > 25)
+  const inativos = [];
+  FD.reps.forEach(r=>r.clis.filter(c=>c.dias&&c.dias>25).forEach(c=>inativos.push({rep:r.nome,n:c.n,dias:c.dias,c:c.c})));
+  inativos.sort((a,b)=>b.dias-a.dias);
+
+  // 4. Categorias em queda (tend < 0)
+  const quedas = D.cats.filter(c=>c.tend<0).sort((a,b)=>a.tend-b.tend);
+
+  function card(cor, icon, titulo, cnt, corpo){
+    return `<div class="alert-card">
+      <div class="alert-card-hd" style="background:${cor}">
+        <span style="font-size:18px">${icon}</span>
+        <h4>${titulo}</h4>
+        <span class="cnt">${cnt}</span>
+      </div>
+      <div class="alert-card-body">${corpo}</div>
+    </div>`;
+  }
+
+  function vazio(msg){ return `<p class="al-vazio">✅ ${msg}</p>`; }
+
+  function acoes(list){
+    return '<ul class="al-acoes">'+list.map(a=>`<li>${a}</li>`).join('')+'</ul>';
+  }
+
+  // --- Card Meta ---
+  let cMeta = metaAlerts.length === 0 ? vazio('Todos os representantes atingiram a meta!') :
+    metaAlerts.map(r=>{
+      const p=ap(r.fat,r.meta), falta=r.meta-r.fat;
+      const catTop=[...r.cats].sort((a,b)=>b.fat-a.fat)[0];
+      return `<div class="al-item">
+        <div class="al-hd"><span class="al-nm">${r.nome}</span><span class="badge ${p<80?'b-da':'b-wa'}">${p}%</span></div>
+        <div class="al-sub">Faltam ${fmt(falta)} — ${r.reg}</div>
+        ${acoes([
+          `Acionar os 3 maiores clientes para antecipar pedidos`,
+          `Focar em <strong>${catTop.n}</strong> — maior volume da carteira`,
+          `Negociar condição especial de entrega esta semana`
+        ])}
+      </div>`;
+    }).join('');
+
+  // --- Card Margem ---
+  let cMarg = margAlerts.length === 0 ? vazio('Todos com margem acima de 40%!') :
+    margAlerts.map(r=>{
+      const catAlta=[...r.cats].sort((a,b)=>b.margem-a.margem)[0];
+      const catBaixa=[...r.cats].sort((a,b)=>a.margem-b.margem)[0];
+      const [sc]=mStat(r.margem);
+      return `<div class="al-item">
+        <div class="al-hd"><span class="al-nm">${r.nome}</span><span class="badge ${sc}">${r.margem}% · gap ${(40-r.margem).toFixed(0)}p.p.</span></div>
+        <div class="al-sub">Meta: 40% — ${r.reg}</div>
+        ${acoes([
+          `Aumentar mix de <strong>${catAlta.n}</strong> (margem ${catAlta.margem}%)`,
+          `Revisar precificação em <strong>${catBaixa.n}</strong> (${catBaixa.margem}%)`,
+          `Evitar concessão de descontos acima de 5%`
+        ])}
+      </div>`;
+    }).join('');
+
+  // --- Card Inativos ---
+  let cInat = inativos.length === 0 ? vazio('Nenhum cliente inativo no período!') :
+    inativos.map(c=>{
+      const sev=c.dias>=45?'b-da':'b-wa';
+      return `<div class="al-item">
+        <div class="al-hd"><span class="al-nm">${c.n}</span><span class="badge ${sev}">${c.dias}d sem compra</span></div>
+        <div class="al-sub">${c.rep} · ${c.c}</div>
+        ${acoes([
+          `Ligar para o responsável de compras imediatamente`,
+          `Enviar proposta com mix personalizado para ${c.c.toLowerCase()}`,
+          c.dias>=45?`Verificar possível inadimplência com financeiro`:`Oferecer frete grátis para reativação`
+        ])}
+      </div>`;
+    }).join('');
+
+  // --- Card Categorias ---
+  let cQueda = quedas.length === 0 ? vazio('Todas as categorias em crescimento!') :
+    quedas.map(c=>{
+      const [mc]=mStat(c.margem);
+      const repAfet=FD.reps.filter(r=>r.cats.some(rc=>rc.n===c.n&&rc.fat<(r.fat*0.15))).map(r=>r.nome);
+      return `<div class="al-item">
+        <div class="al-hd"><span class="al-nm">${c.n}</span><span class="badge ${c.tend<=-5?'b-da':'b-wa'}">${c.tend}% vs mês ant.</span></div>
+        <div class="al-sub">Fat. ${fmt(c.fat)} · Margem ${c.margem}% <span class="badge ${mc}">${mStat(c.margem)[1]}</span>${repAfet.length?` · Atenção: ${repAfet.join(', ')}`:''}</div>
+        ${acoes([
+          `Lançar campanha promocional nesta categoria com os representantes`,
+          `Verificar estoque parado e aplicar desconto para girar`,
+          c.margem<36?`Revisar tabela de preços — margem abaixo do ideal`:`Identificar cliente com maior potencial de expansão`
+        ])}
+      </div>`;
+    }).join('');
+
+  el.innerHTML = `<div class="alert-grid">
+    ${card('#c62828','🎯','Meta em Risco',metaAlerts.length,cMeta)}
+    ${card('#e65100','📉','Margem Abaixo do Ideal',margAlerts.length,cMarg)}
+    ${card('#1565C0','🔔','Clientes sem Compra Recente',inativos.length,cInat)}
+    ${card('#6A1B9A','📊','Categorias em Queda',quedas.length,cQueda)}
+  </div>`;
+}
 
 function buildEstoqueTab(){
   const E=D.estoque;
