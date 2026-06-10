@@ -367,7 +367,7 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
       <div class="chart-grid" style="margin-bottom:20px">
         <div class="chart-card">
           <div class="chart-title">Composição da Receita Líquida (%)</div>
-          <div class="ch"><canvas id="ch-dre-pizza"></canvas></div>
+          <div class="ch tall"><canvas id="ch-dre-pizza"></canvas></div>
         </div>
         <div class="chart-card">
           <div class="chart-title">Lucro Líquido Mensal (R$)</div>
@@ -844,20 +844,42 @@ function buildDRE(){
     </div>`;
 
   // Pizza: composição da RL
+  const cLabels = ['CMV','Desp. Vendas','Desp. Admin','Desp. Financeiras','IRPJ/CSLL','Lucro Líquido'];
+  const cPcts   = [78.19, 6.28, 2.32, 1.99, 3.25, 7.59];
+  const cColors = ['#c62828','#e65100','#1565C0','#7B1FA2','#757575','#2e7d32'];
+  const cVals   = cPcts.map(p => Math.round(rl * p / 100));
+  const fmtK    = v => v >= 1000000 ? 'R$'+(v/1000000).toFixed(2)+'M' : 'R$'+(v/1000).toFixed(0)+'k';
+
   mkChart('ch-dre-pizza',{type:'pie',data:{
-    labels:['CMV','Desp. Vendas','Desp. Admin','Desp. Financeiras','IRPJ/CSLL','Lucro Líquido'],
+    labels: cLabels,
     datasets:[{
-      data:[78.19,6.28,2.32,1.99,3.25,7.59],
-      backgroundColor:['#c62828CC','#e65100CC','#1565C0CC','#7B1FA2CC','#757575CC','#2e7d32CC'],
-      borderWidth:0,
+      data: cPcts,
+      backgroundColor: cColors.map(c=>c+'CC'),
+      borderColor: '#fff', borderWidth: 2,
       datalabels:{
-        formatter:(v,ctx)=>ctx.chart.data.labels[ctx.dataIndex].split(' ')[0]+'\n'+v+'%',
-        color:'#fff',font:{size:10,weight:'bold'}
+        anchor:'end', align:'end', clamp:false, offset:10,
+        formatter:(v,ctx) => v+'%\n'+fmtK(cVals[ctx.dataIndex]),
+        color: ctx => cColors[ctx.dataIndex],
+        font:{size:10,weight:'bold'}, textAlign:'center'
       }
     }]
   },options:{responsive:true,maintainAspectRatio:false,
-    plugins:{datalabels:{},legend:{position:'right'},
-      tooltip:{callbacks:{label:c=>c.label+': '+c.raw+'% da RL'}}}}
+    layout:{padding:{top:40,bottom:20,left:70,right:70}},
+    plugins:{
+      datalabels:{},
+      legend:{
+        position:'bottom',
+        labels:{
+          padding:14,
+          generateLabels: () => cLabels.map((l,i)=>({
+            text: `${l}   ${cPcts[i]}%  —  ${fmtK(cVals[i])}`,
+            fillStyle: cColors[i]+'CC',
+            strokeStyle:'#fff', lineWidth:1, index:i
+          }))
+        }
+      },
+      tooltip:{callbacks:{label:c=>`${cLabels[c.dataIndex]}: ${cPcts[c.dataIndex]}% (${fmtM(cVals[c.dataIndex])})`}}
+    }}
   });
 
   // Lucro Líquido mensal (linha)
