@@ -159,6 +159,24 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
   margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--bd);
 }
 
+/* FILTER BAR */
+.filter-bar{
+  background:#fff;border-bottom:1px solid var(--bd);
+  padding:10px 22px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+}
+.filter-group{display:flex;align-items:center;gap:8px;}
+.filter-label{font-size:12px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;}
+.filter-select{
+  border:1.5px solid var(--bd);border-radius:8px;padding:6px 12px;
+  font-size:13px;color:var(--txt);background:#fff;cursor:pointer;outline:none;
+  transition:border-color .2s;
+}
+.filter-select:focus{border-color:var(--p);}
+.filter-tag{
+  font-size:12px;background:var(--al);color:var(--pd);
+  padding:4px 10px;border-radius:20px;font-weight:600;
+}
+
 @media(max-width:700px){
   .kpi-grid{grid-template-columns:1fr 1fr;}
   .chart-grid{grid-template-columns:1fr;}
@@ -217,6 +235,29 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
     <button class="tab-btn"        onclick="setTab(this,'dir','reps')">Representantes</button>
     <button class="tab-btn"        onclick="setTab(this,'dir','cli')">Clientes</button>
     <button class="tab-btn"        onclick="setTab(this,'dir','estoque')">📦 Estoque</button>
+  </div>
+  <div class="filter-bar">
+    <div class="filter-group">
+      <span class="filter-label">Mês</span>
+      <select class="filter-select" id="sel-mes" onchange="applyFilters()">
+        <option value="0">Janeiro</option>
+        <option value="1">Fevereiro</option>
+        <option value="2">Março</option>
+        <option value="3">Abril</option>
+        <option value="4">Maio</option>
+        <option value="5" selected>Junho</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Loja</span>
+      <select class="filter-select" id="sel-loja" onchange="applyFilters()">
+        <option value="todas">Todas as Lojas</option>
+        <option value="pb">Pato Branco — Matriz</option>
+        <option value="fb">Francisco Beltrão — Filial</option>
+        <option value="cpo">Chapecó — Filial SC</option>
+      </select>
+    </div>
+    <span class="filter-tag" id="filter-tag">Junho · Todas as Lojas</span>
   </div>
   <div class="tab-content">
 
@@ -427,27 +468,27 @@ const D = {
     ]}
   ],
   reps: [
-    { id:1, nome:'Fernanda Oliveira', reg:'Pato Branco/PR', fat:98500,  meta:100000, cli:68, margem:40,
+    { id:1, nome:'Fernanda Oliveira', reg:'Pato Branco/PR', fat:98500,  meta:100000, cli:68, margem:40, loja:'pb',
       fm:[72000,78500,82000,88900,94200,98500], mm:[85000,87000,89000,92000,96000,100000],
       cats:[{n:'Cosméticos/Maquiagem',fat:31200,margem:43},{n:'Cabelos',fat:24800,margem:40},{n:'Perfumaria',fat:19600,margem:39},{n:'Higiene Pessoal',fat:14200,margem:35},{n:'Profissional',fat:8700,margem:28}],
       clis:[{n:'Farmácia Bem Estar',fat:18400,c:'Atacado'},{n:'Salão Glamour',fat:14200,c:'Profissional'},{n:'Perfumaria Bella',fat:12800,c:'Varejo'},{n:'Mercado Central',fat:11500,c:'Atacado'},{n:'Ótica Fashion',fat:9600,c:'Varejo'},{n:'Studio Beleza Total',fat:8900,c:'Profissional'},{n:'Drogaria Nortão',fat:7800,c:'Atacado'},{n:'Empório da Beleza',fat:6900,c:'Varejo'}]
     },
-    { id:2, nome:'Camila Santos', reg:'Chapecó/SC', fat:112400, meta:110000, cli:74, margem:43,
+    { id:2, nome:'Camila Santos', reg:'Chapecó/SC', fat:112400, meta:110000, cli:74, margem:43, loja:'cpo',
       fm:[82000,88900,94200,99800,106500,112400], mm:[90000,92000,95000,100000,105000,110000],
       cats:[{n:'Cosméticos/Maquiagem',fat:38900,margem:46},{n:'Cabelos',fat:29800,margem:43},{n:'Perfumaria',fat:22100,margem:40},{n:'Higiene Pessoal',fat:14200,margem:37},{n:'Profissional',fat:7400,margem:32}],
       clis:[{n:'Drogaria Saúde Total',fat:22100,c:'Atacado'},{n:'Studio Cabelo & Arte',fat:18900,c:'Profissional'},{n:'Cosméticos VIP',fat:16400,c:'Varejo'},{n:'Supermercado Norte',fat:14200,c:'Atacado'},{n:'Salão Espaço Beleza',fat:12800,c:'Profissional'},{n:'Perfumaria da Praça',fat:10900,c:'Varejo'},{n:'Farmácia Familiar',fat:9200,c:'Atacado'},{n:'Beauty Store',fat:7900,c:'Varejo'}]
     },
-    { id:3, nome:'Ricardo Borges', reg:'Francisco Beltrão/PR', fat:89200, meta:95000, cli:61, margem:37,
+    { id:3, nome:'Ricardo Borges', reg:'Francisco Beltrão/PR', fat:89200, meta:95000, cli:61, margem:37, loja:'fb',
       fm:[68000,72500,76800,80200,84900,89200], mm:[78000,80000,82000,85000,90000,95000],
       cats:[{n:'Cosméticos/Maquiagem',fat:24600,margem:41},{n:'Cabelos',fat:22800,margem:38},{n:'Perfumaria',fat:19400,margem:36},{n:'Higiene Pessoal',fat:14200,margem:33},{n:'Profissional',fat:8200,margem:27}],
       clis:[{n:'Farmácia Popular',fat:19200,c:'Atacado'},{n:'Bazar da Beleza',fat:15600,c:'Varejo'},{n:'Mercadinho São José',fat:13400,c:'Atacado'},{n:'Depósito Cosméticos',fat:11800,c:'Atacado'},{n:'Loja das Fragrâncias',fat:9200,c:'Varejo'},{n:'Salão Belo Corte',fat:8100,c:'Profissional'},{n:'Perfumaria Chique',fat:6900,c:'Varejo'},{n:'Mercado Boa Vista',fat:5000,c:'Atacado'}]
     },
-    { id:4, nome:'Patrícia Lima', reg:'Dois Vizinhos/PR', fat:104800, meta:100000, cli:71, margem:41,
+    { id:4, nome:'Patrícia Lima', reg:'Dois Vizinhos/PR', fat:104800, meta:100000, cli:71, margem:41, loja:'pb',
       fm:[79000,84200,88900,94500,99800,104800], mm:[82000,85000,88000,92000,96000,100000],
       cats:[{n:'Cosméticos/Maquiagem',fat:32400,margem:44},{n:'Cabelos',fat:28200,margem:41},{n:'Perfumaria',fat:22800,margem:39},{n:'Higiene Pessoal',fat:13900,margem:36},{n:'Profissional',fat:7500,margem:29}],
       clis:[{n:'Drogaria Nobre',fat:24500,c:'Atacado'},{n:'Salão Princesa',fat:19800,c:'Profissional'},{n:'Perfumaria Elite',fat:17200,c:'Varejo'},{n:'Empório Beleza',fat:15900,c:'Varejo'},{n:'Studio Hair Pro',fat:12400,c:'Profissional'},{n:'Farmácia Dois Vizinhos',fat:10200,c:'Atacado'},{n:'Loja Cosméticos & Mais',fat:8900,c:'Varejo'},{n:'Bazar Tudo Belo',fat:6900,c:'Varejo'}]
     },
-    { id:5, nome:'André Costa', reg:'Palmas/PR', fat:82420, meta:115000, cli:38, margem:32,
+    { id:5, nome:'André Costa', reg:'Palmas/PR', fat:82420, meta:115000, cli:38, margem:32, loja:'fb',
       fm:[68000,71200,74800,77900,80100,82420], mm:[95000,98000,100000,105000,110000,115000],
       cats:[{n:'Cosméticos/Maquiagem',fat:11400,margem:36},{n:'Cabelos',fat:15600,margem:33},{n:'Perfumaria',fat:14807,margem:30},{n:'Higiene Pessoal',fat:15800,margem:31},{n:'Profissional',fat:24813,margem:26}],
       clis:[{n:'Farmácia Vida',fat:16800,c:'Atacado'},{n:'Bazar Mix',fat:13200,c:'Varejo'},{n:'Mercado Bom Preço',fat:11600,c:'Atacado'},{n:'Loja Beleza & Cia',fat:10900,c:'Varejo'},{n:'Salão Corte & Arte',fat:8920,c:'Profissional'},{n:'Farmácia Palmas',fat:7400,c:'Atacado'},{n:'Beauty Mix',fat:6800,c:'Varejo'},{n:'Empório do Bem',fat:6800,c:'Varejo'}]
@@ -481,6 +522,56 @@ function mkChart(id,cfg){
   charts[id]=new Chart(el,cfg);
 }
 
+// ── FILTERED DATA ─────────────────────────────────────────────
+let FD = {};
+
+function computeFD(){
+  const mes  = parseInt(document.getElementById('sel-mes').value);
+  const loja = document.getElementById('sel-loja').value;
+  const lojaNames = {todas:'Todas as Lojas',pb:'Pato Branco — Matriz',fb:'Francisco Beltrão — Filial',cpo:'Chapecó — Filial SC'};
+
+  const reps = loja === 'todas' ? D.reps : D.reps.filter(r => r.loja === loja);
+  const allFatJun = D.reps.reduce((s,r) => s + r.fat, 0);
+  const filtFatJun = reps.reduce((s,r) => s + r.fat, 0);
+  const lojaRatio = filtFatJun / allFatJun;
+
+  const fat_mes  = reps.reduce((s,r) => s + r.fm[mes], 0);
+  const meta_mes = reps.reduce((s,r) => s + r.mm[mes], 0);
+  const fat_ano  = reps.reduce((s,r) => s + r.fm.slice(0,mes+1).reduce((a,b)=>a+b,0), 0);
+  const meta_ano = reps.reduce((s,r) => s + r.mm.slice(0,mes+1).reduce((a,b)=>a+b,0), 0);
+
+  FD = {
+    mesLabel: D.meses[mes], mesIdx: mes, loja, lojaLabel: lojaNames[loja], lojaRatio,
+    kpis: {
+      fat_mes, meta_mes, fat_ano, meta_ano,
+      ticket: D.kpis.ticket,
+      cli_ativos: Math.round(D.kpis.cli_ativos * lojaRatio),
+      novos: Math.round(D.kpis.novos * lojaRatio),
+      margem: D.margem_m[mes], margem_meta: 40
+    },
+    meses_shown: D.meses.slice(0, mes+1),
+    fat_m:    D.meses.slice(0,mes+1).map((_,i) => reps.reduce((s,r) => s + r.fm[i], 0)),
+    meta_m:   D.meses.slice(0,mes+1).map((_,i) => reps.reduce((s,r) => s + r.mm[i], 0)),
+    margem_m: D.margem_m.slice(0, mes+1),
+    cats:   D.cats.map(c => ({...c, fat: Math.round(c.fat * lojaRatio), meta: Math.round(c.meta * lojaRatio)})),
+    canais: D.canais.map(c => ({...c, fat: Math.round(c.fat * lojaRatio)})),
+    reps: reps.map(r => ({
+      ...r,
+      fat: r.fm[mes], meta: r.mm[mes],
+      cats: r.cats.map(c => ({...c, fat: Math.round(c.fat * (r.fat>0 ? r.fm[mes]/r.fat : 1))}))
+    }))
+  };
+
+  document.getElementById('filter-tag').textContent = FD.mesLabel+'/2026 · '+FD.lojaLabel;
+}
+
+function applyFilters(){
+  computeFD();
+  buildDirKPIs(); buildDirCharts(); buildCatTable(); buildRepTable(); buildAllCli();
+  document.getElementById('dir-sub').textContent = FD.mesLabel+'/2026 · '+FD.lojaLabel;
+  document.getElementById('drill-rep').classList.remove('open');
+}
+
 // ── NAVIGATION ────────────────────────────────────────────────
 function show(id){
   document.getElementById('login-screen').style.display = id==='login-screen' ? 'flex' : 'none';
@@ -501,12 +592,13 @@ function setTab(btn,prefix,name){
 // ── DIRETORIA ─────────────────────────────────────────────────
 function loginDiretoria(){
   show('app-screen');
-  document.getElementById('dir-sub').textContent = D.mes+' · Visão Consolidada';
+  computeFD();
+  document.getElementById('dir-sub').textContent = FD.mesLabel+'/2026 · '+FD.lojaLabel;
   buildDirKPIs(); buildDirCharts(); buildRepTable(); buildAllCli(); buildCatTable(); buildEstoque(); buildEstoqueTab();
 }
 
 function buildDirKPIs(){
-  const k=D.kpis, p=ap(k.fat_mes,k.meta_mes), pa=ap(k.fat_ano,k.meta_ano);
+  const k=FD.kpis, p=ap(k.fat_mes,k.meta_mes), pa=ap(k.fat_ano,k.meta_ano);
   const pc=p>=100?'ok':p<80?'da':'';
   document.getElementById('dir-kpis').innerHTML=`
     <div class="kpi-card">
@@ -518,10 +610,10 @@ function buildDirKPIs(){
     <div class="kpi-card ac">
       <div class="kpi-label">Atingimento Mês</div>
       <div class="kpi-value">${p}%</div>
-      <div class="kpi-sub">${D.mes}</div>
+      <div class="kpi-sub">${FD.mesLabel}/2026</div>
     </div>
     <div class="kpi-card ok">
-      <div class="kpi-label">Faturamento Anual</div>
+      <div class="kpi-label">Faturamento Acum.</div>
       <div class="kpi-value">${fmt(k.fat_ano)}</div>
       <div class="kpi-sub">Meta: ${fmt(k.meta_ano)} · ${pa}%</div>
     </div>
@@ -545,34 +637,34 @@ function buildDirKPIs(){
 function buildDirCharts(){
   mkChart('ch-ring',{type:'doughnut',data:{
     labels:['Realizado','A Atingir'],
-    datasets:[{data:[D.kpis.fat_mes,Math.max(0,D.kpis.meta_mes-D.kpis.fat_mes)],
+    datasets:[{data:[FD.kpis.fat_mes,Math.max(0,FD.kpis.meta_mes-FD.kpis.fat_mes)],
       backgroundColor:['#007B8E','#B2EBF2'],borderWidth:0,datalabels:DL_PIE}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'70%',
       plugins:{datalabels:DL_PIE,legend:{position:'bottom'},tooltip:{callbacks:{label:c=>fmt(c.raw)}}}}
   });
   mkChart('ch-canal',{type:'pie',data:{
-    labels:D.canais.map(c=>c.n),
-    datasets:[{data:D.canais.map(c=>c.fat),backgroundColor:['#007B8E','#26C6DA','#4DB6AC'],borderWidth:0,datalabels:DL_PIE}]},
+    labels:FD.canais.map(c=>c.n),
+    datasets:[{data:FD.canais.map(c=>c.fat),backgroundColor:['#007B8E','#26C6DA','#4DB6AC'],borderWidth:0,datalabels:DL_PIE}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{datalabels:DL_PIE,legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)+' ('+pct(c.raw,D.kpis.fat_mes)+')'}}}}
+      plugins:{datalabels:DL_PIE,legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)+' ('+pct(c.raw,FD.kpis.fat_mes)+')'}}}}
   });
-  mkChart('ch-mensal',{type:'bar',data:{labels:D.meses,datasets:[
-    {label:'Faturamento',data:D.fat_m,backgroundColor:'#007B8ECC',borderRadius:5,datalabels:DL_BAR},
-    {label:'Meta',data:D.meta_m,type:'line',borderColor:'#e65100',backgroundColor:'transparent',
+  mkChart('ch-mensal',{type:'bar',data:{labels:FD.meses_shown,datasets:[
+    {label:'Faturamento',data:FD.fat_m,backgroundColor:'#007B8ECC',borderRadius:5,datalabels:DL_BAR},
+    {label:'Meta',data:FD.meta_m,type:'line',borderColor:'#e65100',backgroundColor:'transparent',
       pointBackgroundColor:'#e65100',borderWidth:2,pointRadius:4,tension:.3,datalabels:DL_OFF}
   ]},options:{responsive:true,maintainAspectRatio:false,
     layout:{padding:{top:22}},
     plugins:{datalabels:{},legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},
     scales:{y:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
   });
-  mkChart('ch-margem',{type:'line',data:{labels:D.meses,datasets:[
-    {label:'Margem Real (%)',data:D.margem_m,borderColor:'#007B8E',backgroundColor:'rgba(0,123,142,.12)',
-      borderWidth:2.5,pointRadius:5,pointBackgroundColor:D.margem_m.map(v=>v>=42?'#2e7d32':v>=36?'#007B8E':'#e65100'),
+  mkChart('ch-margem',{type:'line',data:{labels:FD.meses_shown,datasets:[
+    {label:'Margem Real (%)',data:FD.margem_m,borderColor:'#007B8E',backgroundColor:'rgba(0,123,142,.12)',
+      borderWidth:2.5,pointRadius:5,pointBackgroundColor:FD.margem_m.map(v=>v>=42?'#2e7d32':v>=36?'#007B8E':'#e65100'),
       pointBorderColor:'#fff',pointBorderWidth:2,tension:.35,fill:true,datalabels:{
         anchor:'top',align:'top',formatter:v=>v+'%',font:{size:10,weight:'bold'},
-        color:ctx=>D.margem_m[ctx.dataIndex]>=42?'#2e7d32':D.margem_m[ctx.dataIndex]>=36?'#007B8E':'#e65100'
+        color:ctx=>FD.margem_m[ctx.dataIndex]>=42?'#2e7d32':FD.margem_m[ctx.dataIndex]>=36?'#007B8E':'#e65100'
       }},
-    {label:'Meta (40%)',data:D.meses.map(()=>40),borderColor:'#e65100',borderDash:[6,4],borderWidth:1.5,
+    {label:'Meta (40%)',data:FD.meses_shown.map(()=>40),borderColor:'#e65100',borderDash:[6,4],borderWidth:1.5,
       pointRadius:0,fill:false,datalabels:DL_OFF}
   ]},options:{responsive:true,maintainAspectRatio:false,
     layout:{padding:{top:24}},
@@ -580,9 +672,9 @@ function buildDirCharts(){
     scales:{y:{min:30,max:50,ticks:{callback:v=>v+'%'},grid:{color:'#E0F7FA'}},
             x:{grid:{color:'#E0F7FA'}}}}
   });
-  mkChart('ch-cat',{type:'bar',data:{labels:D.cats.map(c=>c.n),datasets:[
-    {label:'Faturamento',data:D.cats.map(c=>c.fat),backgroundColor:'#007B8ECC',borderRadius:4,datalabels:DL_BARH},
-    {label:'Meta',       data:D.cats.map(c=>c.meta),backgroundColor:'#26C6DA55',borderRadius:4,datalabels:DL_OFF}
+  mkChart('ch-cat',{type:'bar',data:{labels:FD.cats.map(c=>c.n),datasets:[
+    {label:'Faturamento',data:FD.cats.map(c=>c.fat),backgroundColor:'#007B8ECC',borderRadius:4,datalabels:DL_BARH},
+    {label:'Meta',       data:FD.cats.map(c=>c.meta),backgroundColor:'#26C6DA55',borderRadius:4,datalabels:DL_OFF}
   ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
     layout:{padding:{right:60}},
     plugins:{datalabels:{},legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},
@@ -741,9 +833,9 @@ function openEstoqueDrill(idx){
 }
 
 function buildCatTable(){
-  const total=D.cats.reduce((s,c)=>s+c.fat,0);
+  const total=FD.cats.reduce((s,c)=>s+c.fat,0);
   let h='<table><tr><th>Categoria</th><th>Faturamento</th><th>Meta</th><th>Atingimento</th><th>Part.%</th><th>Margem</th><th>Status Margem</th></tr>';
-  D.cats.forEach(c=>{
+  FD.cats.forEach(c=>{
     const [mc,ml]=mStat(c.margem);
     h+=`<tr><td><strong>${c.n}</strong></td><td>${fmt(c.fat)}</td><td>${fmt(c.meta)}</td><td>${badge(c.fat,c.meta)}</td><td>${pct(c.fat,total)}</td><td><strong>${c.margem}%</strong></td><td><span class="badge ${mc}">${ml}</span></td></tr>`;
   });
@@ -753,7 +845,7 @@ function buildCatTable(){
 
 function buildRepTable(){
   let h='<table><tr><th>#</th><th>Representante</th><th>Região</th><th>Clientes</th><th>Faturamento</th><th>Meta</th><th>Atingimento</th><th>Margem</th><th>Status</th></tr>';
-  D.reps.forEach((r,i)=>{
+  FD.reps.forEach((r,i)=>{
     const [mc,ml]=mStat(r.margem);
     h+=`<tr class="clickable" onclick="openRepDrill(${r.id})">
       <td>${i+1}</td><td><strong>${r.nome}</strong></td><td>${r.reg}</td>
@@ -767,7 +859,7 @@ function buildRepTable(){
 }
 
 function openRepDrill(id){
-  const r=D.reps.find(x=>x.id===id);
+  const r=FD.reps.find(x=>x.id===id)||D.reps.find(x=>x.id===id);
   document.getElementById('drill-rep').classList.add('open');
   document.getElementById('drill-rep-title').textContent='📊 '+r.nome+' — Detalhes';
   document.getElementById('drill-cli-hd').textContent='Principais Clientes — '+r.nome;
@@ -804,7 +896,7 @@ function openRepDrill(id){
 
 function buildAllCli(){
   const all=[];
-  D.reps.forEach(r=>r.clis.forEach(c=>all.push({...c,rep:r.nome})));
+  FD.reps.forEach(r=>r.clis.forEach(c=>all.push({...c,rep:r.nome})));
   all.sort((a,b)=>b.fat-a.fat);
   let h='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Representante</th><th>Faturamento</th></tr>';
   all.slice(0,20).forEach((c,i)=>{
