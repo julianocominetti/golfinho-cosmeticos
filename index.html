@@ -443,7 +443,22 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
 
     <div id="rep-tab-rcli" class="tab-panel">
       <div class="sec-hd" id="rep-cli-hd"></div>
+      <p style="font-size:13px;color:var(--mu);margin-bottom:14px">Clique em um cliente para ver categorias e produtos comprados</p>
       <div class="table-wrap" id="rep-cli-tbl"></div>
+      <div class="drill" id="rep-cli-drill" style="margin-top:16px">
+        <div class="drill-hd">
+          <div class="drill-title" id="rep-cli-drill-title"></div>
+          <button class="drill-x" onclick="document.getElementById('rep-cli-drill').classList.remove('open')">✕</button>
+        </div>
+        <div class="kpi-grid" id="rep-cli-drill-kpis" style="margin-bottom:16px"></div>
+        <div class="drill-grid">
+          <div class="chart-card">
+            <div class="chart-title">Distribuição por Categoria</div>
+            <div class="ch"><canvas id="ch-cli-cat"></canvas></div>
+          </div>
+          <div id="rep-cli-prods" style="overflow-y:auto;max-height:300px;display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+      </div>
     </div>
 
     <div id="rep-tab-ralert" class="tab-panel">
@@ -1339,13 +1354,102 @@ function buildRepDash(r){
   document.getElementById('rep-tab-rcat').insertAdjacentHTML('beforeend','<div style="margin-top:18px">'+hcat+'</div>');
 
   buildRepAlertas(r);
+  document.getElementById('rep-cli-drill').classList.remove('open');
   document.getElementById('rep-cli-hd').textContent='Seus Principais Clientes';
-  let h='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Faturamento</th></tr>';
+  let h='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Faturamento</th><th>Última Compra</th></tr>';
   r.clis.forEach((c,i)=>{
-    h+=`<tr><td>${i+1}</td><td><strong>${c.n}</strong></td><td><span class="badge b-ch">${c.c}</span></td><td>${fmt(c.fat)}</td></tr>`;
+    const diasBadge = c.dias ? `<span class="badge ${c.dias>=45?'b-da':'b-wa'}">${c.dias}d</span>` : '<span class="badge b-ok">Ativo</span>';
+    h+=`<tr class="clickable" onclick="openRepCliDrill(${r.id},${i})">
+      <td>${i+1}</td><td><strong>${c.n}</strong></td>
+      <td><span class="badge b-ch">${c.c}</span></td>
+      <td>${fmt(c.fat)}</td>
+      <td>${diasBadge}</td>
+    </tr>`;
   });
   h+='</table>';
   document.getElementById('rep-cli-tbl').innerHTML=h;
+}
+
+function getClientCompras(rep, cli){
+  return rep.cats.map(cat => {
+    const share = rep.fat > 0 ? cat.fat / rep.fat : 0;
+    const val = Math.round(cli.fat * share);
+    const estCat = D.estoque.find(e => e.n === cat.n);
+    const totalEst = estCat ? estCat.val : 1;
+    const produtos = estCat
+      ? estCat.produtos.slice(0,4).map(p => ({n:p.n, val:Math.round(val * p.val / totalEst)})).filter(p=>p.val>0)
+      : [];
+    return {cat:cat.n, val, margem:cat.margem, produtos};
+  }).filter(c => c.val > 0);
+}
+
+function openRepCliDrill(repId, cliIdx){
+  const rep = D.reps.find(r => r.id === repId);
+  const cli = rep.clis[cliIdx];
+  const compras = getClientCompras(rep, cli);
+  const totalVal = compras.reduce((s,c) => s+c.val, 0);
+
+  const drill = document.getElementById('rep-cli-drill');
+  drill.classList.add('open');
+  document.getElementById('rep-cli-drill-title').textContent = '🛒 '+cli.n+' — Categorias & Produtos';
+
+  // KPIs do cliente
+  const topCat = [...compras].sort((a,b)=>b.val-a.val)[0];
+  const [mc,ml] = mStat(rep.margem);
+  document.getElementById('rep-cli-drill-kpis').innerHTML = `
+    <div class="kpi-card ok">
+      <div class="kpi-label">Total Comprado</div>
+      <div class="kpi-value">${fmt(cli.fat)}</div>
+      <div class="kpi-sub">Canal: ${cli.c}</div>
+    </div>
+    <div class="kpi-card in">
+      <div class="kpi-label">Categoria Principal</div>
+      <div class="kpi-value" style="font-size:17px">${topCat.cat}</div>
+      <div class="kpi-sub">${fmt(topCat.val)} · ${pct(topCat.val,totalVal)}</div>
+    </div>
+    <div class="kpi-card ${mc}">
+      <div class="kpi-label">Margem do Cliente</div>
+      <div class="kpi-value">${rep.margem}%</div>
+      <div class="kpi-sub"><span class="badge ${mc}">${ml}</span></div>
+    </div>
+    ${cli.dias ? `<div class="kpi-card ${cli.dias>=45?'da':'wa'}">
+      <div class="kpi-label">Última Compra</div>
+      <div class="kpi-value">${cli.dias}d atrás</div>
+      <div class="kpi-sub"><span class="badge ${cli.dias>=45?'b-da':'b-wa'}">${cli.dias>=45?'Crítico':'Atenção'}</span></div>
+    </div>` : ''}`;
+
+  // Gráfico
+  mkChart('ch-cli-cat',{type:'doughnut',data:{
+    labels: compras.map(c=>c.cat),
+    datasets:[{data:compras.map(c=>c.val),backgroundColor:CATS_C,borderWidth:0,datalabels:DL_PIE}]
+  },options:{responsive:true,maintainAspectRatio:false,cutout:'45%',
+    plugins:{datalabels:DL_PIE,legend:{position:'right',labels:{font:{size:11}}},
+      tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)+' ('+pct(c.raw,totalVal)+')'}}}
+  }});
+
+  // Produtos por categoria
+  const prods = compras.map(c => {
+    const [cc,cl]=mStat(c.margem);
+    return `<div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--al);border-radius:8px;margin-bottom:6px">
+        <strong style="font-size:13px">${c.cat}</strong>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="font-size:12px">${fmt(c.val)}</span>
+          <span class="badge b-ch">${pct(c.val,totalVal)}</span>
+          <span class="badge ${cc}">${c.margem}%</span>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        ${c.produtos.map(p=>`<tr>
+          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px">${p.n}</td>
+          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;font-weight:600">${fmt(p.val)}</td>
+          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:11px;text-align:right;color:var(--mu)">${pct(p.val,c.val)}</td>
+        </tr>`).join('')}
+      </table>
+    </div>`;
+  }).join('');
+  document.getElementById('rep-cli-prods').innerHTML = prods;
+  drill.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function buildRepAlertas(r){
