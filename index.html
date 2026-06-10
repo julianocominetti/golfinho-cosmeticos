@@ -416,6 +416,7 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
     <button class="tab-btn active" onclick="setTab(this,'rep','prod')">Minha Produção</button>
     <button class="tab-btn"        onclick="setTab(this,'rep','rcat')">Categorias</button>
     <button class="tab-btn"        onclick="setTab(this,'rep','rcli')">Meus Clientes</button>
+    <button class="tab-btn"        onclick="setTab(this,'rep','ralert')">🚨 Alertas</button>
   </div>
   <div class="tab-content">
 
@@ -443,6 +444,10 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
     <div id="rep-tab-rcli" class="tab-panel">
       <div class="sec-hd" id="rep-cli-hd"></div>
       <div class="table-wrap" id="rep-cli-tbl"></div>
+    </div>
+
+    <div id="rep-tab-ralert" class="tab-panel">
+      <div id="rep-alertas-section"></div>
     </div>
 
   </div>
@@ -1326,6 +1331,7 @@ function buildRepDash(r){
   hcat+='</table></div>';
   document.getElementById('rep-tab-rcat').insertAdjacentHTML('beforeend','<div style="margin-top:18px">'+hcat+'</div>');
 
+  buildRepAlertas(r);
   document.getElementById('rep-cli-hd').textContent='Seus Principais Clientes';
   let h='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Faturamento</th></tr>';
   r.clis.forEach((c,i)=>{
@@ -1333,6 +1339,132 @@ function buildRepDash(r){
   });
   h+='</table>';
   document.getElementById('rep-cli-tbl').innerHTML=h;
+}
+
+function buildRepAlertas(r){
+  const el = document.getElementById('rep-alertas-section');
+  if(!el) return;
+
+  const p = ap(r.fat, r.meta);
+
+  // Meta
+  const temMeta = p < 100;
+  const falta = r.meta - r.fat;
+  const catTop = [...r.cats].sort((a,b)=>b.fat-a.fat)[0];
+
+  // Margem por categoria
+  const catsAlerta = r.cats.filter(c=>c.margem<40).sort((a,b)=>a.margem-b.margem);
+  const catMaisAlta = [...r.cats].sort((a,b)=>b.margem-a.margem)[0];
+
+  // Clientes inativos
+  const inativos = r.clis.filter(c=>c.dias&&c.dias>25).sort((a,b)=>b.dias-a.dias);
+
+  // Categorias em queda (usa tend de D.cats)
+  const quedas = D.cats.filter(c=>c.tend<0).sort((a,b)=>a.tend-b.tend);
+
+  function card(cor, icon, titulo, corpo){
+    return `<div class="alert-card" style="margin-bottom:16px">
+      <div class="alert-card-hd" style="background:${cor}">
+        <span style="font-size:18px">${icon}</span>
+        <h4>${titulo}</h4>
+      </div>
+      <div class="alert-card-body">${corpo}</div>
+    </div>`;
+  }
+  function acoes(list){
+    return '<ul class="al-acoes">'+list.map(a=>`<li>${a}</li>`).join('')+'</ul>';
+  }
+  function vazio(msg){ return `<p class="al-vazio">✅ ${msg}</p>`; }
+
+  // --- Meta ---
+  const corpoMeta = !temMeta ? vazio('Você já atingiu sua meta este mês!') :
+    `<div class="al-item">
+      <div class="al-hd">
+        <span class="al-nm">Meta ${D.meses[5]}/2026</span>
+        <span class="badge ${p<80?'b-da':'b-wa'}">${p}% atingido</span>
+      </div>
+      <div class="al-sub">Faltam ${fmt(falta)} · Meta: ${fmt(r.meta)}</div>
+      ${acoes([
+        `Acionar os 3 maiores clientes para antecipar pedidos`,
+        `Priorizar <strong>${catTop.n}</strong> — maior volume da sua carteira`,
+        `Negociar prazo de entrega especial para fechar esta semana`
+      ])}
+    </div>`;
+
+  // --- Margem ---
+  const corpoMarg = catsAlerta.length === 0 ? vazio('Todas as categorias com margem acima de 40%!') :
+    catsAlerta.map(c=>{
+      const [sc]=mStat(c.margem);
+      return `<div class="al-item">
+        <div class="al-hd">
+          <span class="al-nm">${c.n}</span>
+          <span class="badge ${sc}">${c.margem}% · gap ${(40-c.margem).toFixed(0)}p.p.</span>
+        </div>
+        <div class="al-sub">Revise precificação nesta categoria</div>
+        ${acoes([
+          `Substituir pedidos de ${c.n} por <strong>${catMaisAlta.n}</strong> (${catMaisAlta.margem}%)`,
+          `Evitar descontos acima de 5% nesta categoria`,
+          `Discutir tabela de preços com a supervisão`
+        ])}
+      </div>`;
+    }).join('');
+
+  // --- Clientes inativos ---
+  const corpoInat = inativos.length === 0 ? vazio('Todos os seus clientes com compra recente!') :
+    inativos.map(c=>{
+      const sev = c.dias>=45?'b-da':'b-wa';
+      return `<div class="al-item">
+        <div class="al-hd">
+          <span class="al-nm">${c.n}</span>
+          <span class="badge ${sev}">${c.dias}d sem compra</span>
+        </div>
+        <div class="al-sub">${c.c}</div>
+        ${acoes([
+          `Ligar hoje para o responsável de compras`,
+          `Enviar proposta com condições especiais para reativação`,
+          c.dias>=45?`Verificar possível problema de relacionamento ou crédito`:`Oferecer amostra de novidade para visita`
+        ])}
+      </div>`;
+    }).join('');
+
+  // --- Categorias em queda ---
+  const corpoQueda = quedas.length === 0 ? vazio('Nenhuma categoria em queda!') :
+    quedas.map(c=>{
+      const repCat = r.cats.find(rc=>rc.n===c.n);
+      const fatRep = repCat ? repCat.fat : 0;
+      return `<div class="al-item">
+        <div class="al-hd">
+          <span class="al-nm">${c.n}</span>
+          <span class="badge ${c.tend<=-5?'b-da':'b-wa'}">${c.tend}% vs mês ant.</span>
+        </div>
+        <div class="al-sub">Sua venda: ${fmt(fatRep)} · Margem ${c.margem}%</div>
+        ${acoes([
+          `Oferecer mix desta categoria a clientes que ainda não compram`,
+          `Apresentar lançamentos ou produtos de alta rotatividade`,
+          `Verificar se há estoque disponível para promoção rápida`
+        ])}
+      </div>`;
+    }).join('');
+
+  // Resumo no topo
+  const totalAlertas = (temMeta?1:0) + catsAlerta.length + inativos.length + quedas.length;
+  const resumo = totalAlertas === 0
+    ? `<div style="background:#E8F5E9;border-radius:12px;padding:16px;margin-bottom:16px;color:#1B5E20;font-weight:600;font-size:14px">
+        ✅ Nenhum alerta ativo — você está no caminho certo!
+       </div>`
+    : `<div style="background:#FFF3E0;border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:22px">⚠️</span>
+        <div>
+          <div style="font-weight:700;color:#BF360C">${totalAlertas} alerta${totalAlertas>1?'s':''} ativ${totalAlertas>1?'os':'o'}</div>
+          <div style="font-size:12px;color:#666">Revise as ações abaixo para melhorar seus resultados</div>
+        </div>
+      </div>`;
+
+  el.innerHTML = resumo +
+    card('#c62828','🎯','Meta em Risco', corpoMeta) +
+    card('#e65100','📉','Categorias com Margem Abaixo do Ideal', corpoMarg) +
+    card('#1565C0','🔔','Meus Clientes sem Compra Recente', corpoInat) +
+    card('#6A1B9A','📊','Categorias em Queda', corpoQueda);
 }
 
 // ── INIT ──────────────────────────────────────────────────────
