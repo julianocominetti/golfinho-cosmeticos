@@ -385,11 +385,11 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
       </div>
       <div class="kpi-grid" id="dre-kpis"></div>
       <div class="chart-grid" style="margin-bottom:20px">
-        <div class="chart-card">
+        <div class="chart-card full">
           <div class="chart-title">Composição da Receita Líquida (%)</div>
-          <div class="ch tall"><canvas id="ch-dre-pizza"></canvas></div>
+          <div class="ch" style="height:320px"><canvas id="ch-dre-pizza"></canvas></div>
         </div>
-        <div class="chart-card">
+        <div class="chart-card full">
           <div class="chart-title">Lucro Líquido Mensal (R$)</div>
           <div class="ch"><canvas id="ch-dre-ll"></canvas></div>
         </div>
@@ -868,44 +868,51 @@ function buildDRE(){
       <div class="kpi-sub">${fmtM(d.cmv)}</div>
     </div>`;
 
-  // Pizza: composição da RL
-  const cLabels = ['CMV','Desp. Vendas','Desp. Admin','Desp. Financeiras','IRPJ/CSLL','Lucro Líquido'];
+  // Doughnut: composição da RL
+  const cLabels = ['CMV','Desp. Vendas','Desp. Admin','Desp. Financeiras','IRPJ / CSLL','Lucro Líquido'];
   const cPcts   = [78.19, 6.28, 2.32, 1.99, 3.25, 7.59];
   const cColors = ['#c62828','#e65100','#1565C0','#7B1FA2','#757575','#2e7d32'];
   const cVals   = cPcts.map(p => Math.round(rl * p / 100));
-  const fmtK    = v => v >= 1000000 ? 'R$'+(v/1000000).toFixed(2)+'M' : 'R$'+(v/1000).toFixed(0)+'k';
+  const fmtK    = v => v>=1000000 ? 'R$'+(v/1000000).toFixed(2)+'M' : 'R$'+(v/1000).toFixed(0)+'k';
 
-  mkChart('ch-dre-pizza',{type:'pie',data:{
+  mkChart('ch-dre-pizza',{type:'doughnut',data:{
     labels: cLabels,
     datasets:[{
       data: cPcts,
-      backgroundColor: cColors.map(c=>c+'CC'),
-      borderColor: '#fff', borderWidth: 2,
+      backgroundColor: cColors.map(c=>c+'DD'),
+      borderColor:'#fff', borderWidth:3,
       datalabels:{
-        anchor:'end', align:'end', clamp:false, offset:10,
-        formatter:(v,ctx) => v+'%\n'+fmtK(cVals[ctx.dataIndex]),
-        color: ctx => cColors[ctx.dataIndex],
-        font:{size:10,weight:'bold'}, textAlign:'center'
+        display: ctx => cPcts[ctx.dataIndex] >= 4,
+        anchor:'center', align:'center',
+        formatter: v => v+'%',
+        color:'#fff',
+        font:{size:13,weight:'bold'},
+        textShadowBlur:4, textShadowColor:'rgba(0,0,0,.4)'
       }
     }]
-  },options:{responsive:true,maintainAspectRatio:false,
-    layout:{padding:{top:40,bottom:20,left:70,right:70}},
+  },options:{
+    responsive:true, maintainAspectRatio:false,
+    cutout:'42%',
+    layout:{padding:8},
     plugins:{
       datalabels:{},
       legend:{
-        position:'bottom',
+        position:'right',
+        align:'center',
         labels:{
-          padding:14,
+          boxWidth:14, boxHeight:14,
+          padding:18,
+          font:{size:12},
           generateLabels: () => cLabels.map((l,i)=>({
-            text: `${l}   ${cPcts[i]}%  —  ${fmtK(cVals[i])}`,
-            fillStyle: cColors[i]+'CC',
+            text: `${l}   ${cPcts[i]}%   ${fmtK(cVals[i])}`,
+            fillStyle: cColors[i]+'DD',
             strokeStyle:'#fff', lineWidth:1, index:i
           }))
         }
       },
-      tooltip:{callbacks:{label:c=>`${cLabels[c.dataIndex]}: ${cPcts[c.dataIndex]}% (${fmtM(cVals[c.dataIndex])})`}}
-    }}
-  });
+      tooltip:{callbacks:{label:c=>`${cLabels[c.dataIndex]}: ${cPcts[c.dataIndex]}%  —  ${fmtM(cVals[c.dataIndex])}`}}
+    }
+  }});
 
   // Lucro Líquido mensal (linha)
   const llMensal = FD.fat_m.map(v => Math.round(v * DRE_PCT.lucro_liq));
