@@ -282,9 +282,6 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
           <div class="ch"><canvas id="ch-margem"></canvas></div>
         </div>
       </div>
-      <div class="sec-hd" style="margin-top:8px">📦 Visão de Estoque</div>
-      <div class="kpi-grid" id="est-kpis"></div>
-      <div class="table-wrap" id="est-tbl"></div>
     </div>
 
     <div id="dir-tab-cat" class="tab-panel">
@@ -402,97 +399,97 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
 // ── DATA ──────────────────────────────────────────────────────
 const D = {
   mes: 'Junho/2026',
-  kpis: { fat_mes:487320, meta_mes:520000, fat_ano:2736820, meta_ano:2830000, ticket:1240, cli_ativos:312, novos:18, margem:38.5, margem_meta:40 },
+  kpis: { fat_mes:1240000, meta_mes:1335000, fat_ano:6600000, meta_ano:7085000, ticket:3150, cli_ativos:318, novos:21, margem:38.5, margem_meta:40 },
   meses: ['Jan','Fev','Mar','Abr','Mai','Jun'],
-  fat_m:    [412500,438900,451200,467800,479100,487320],
-  meta_m:   [440000,450000,460000,470000,490000,520000],
+  fat_m:    [980000, 1020000, 1080000, 1120000, 1160000, 1240000],
+  meta_m:   [1065000,1105000,1150000,1185000,1245000,1335000],
   margem_m: [36.2, 37.1, 38.4, 39.1, 38.8, 38.5],
   cats: [
-    {n:'Cosméticos/Maquiagem', fat:138500, meta:145000, margem:44},
-    {n:'Cabelos',              fat:121200, meta:130000, margem:41},
-    {n:'Perfumaria',           fat:98700,  meta:100000, margem:38},
-    {n:'Higiene Pessoal',      fat:72300,  meta:75000,  margem:35},
-    {n:'Profissional',         fat:56620,  meta:70000,  margem:29}
+    {n:'Cosméticos/Maquiagem', fat:352000, meta:370000, margem:44},
+    {n:'Cabelos',              fat:308000, meta:330000, margem:41},
+    {n:'Perfumaria',           fat:251000, meta:255000, margem:38},
+    {n:'Higiene Pessoal',      fat:184000, meta:190000, margem:35},
+    {n:'Profissional',         fat:145000, meta:190000, margem:29}
   ],
   canais: [
-    {n:'Atacado',fat:231800},{n:'Varejo',fat:158400},{n:'Profissional',fat:97120}
+    {n:'Atacado',fat:590000},{n:'Varejo',fat:403000},{n:'Profissional',fat:247000}
   ],
   estoque: [
-    { n:'Cosméticos/Maquiagem', val:82400, giro:28, cob:0.9, produtos:[
-      {n:'Base Líquida L\'Oréal',      val:12400, giro:21},
-      {n:'Batom Maybelline',            val:8900,  giro:18},
-      {n:'Paleta de Sombras Ruby Rose', val:11200, giro:26},
-      {n:'Primer Facial NYX',           val:9800,  giro:31},
-      {n:'Corretivo Max Factor',        val:7600,  giro:25},
-      {n:'Blush Vult',                  val:6800,  giro:28},
-      {n:'Máscara de Cílios Océane',    val:8200,  giro:22},
-      {n:'Pó Compacto Dailus',          val:7500,  giro:32},
-      {n:'Contorno Kiko',               val:5400,  giro:38},
-      {n:'Delineador Bruna Tavares',    val:4600,  giro:24}
+    { n:'Cosméticos/Maquiagem', val:210000, giro:28, cob:0.9, produtos:[
+      {n:'Base Líquida L\'Oréal',      val:32000, giro:21},
+      {n:'Batom Maybelline',            val:23000, giro:18},
+      {n:'Paleta de Sombras Ruby Rose', val:29000, giro:26},
+      {n:'Primer Facial NYX',           val:25000, giro:31},
+      {n:'Corretivo Max Factor',        val:19000, giro:25},
+      {n:'Blush Vult',                  val:17000, giro:28},
+      {n:'Máscara de Cílios Océane',    val:21000, giro:22},
+      {n:'Pó Compacto Dailus',          val:19000, giro:32},
+      {n:'Contorno Kiko',               val:14000, giro:38},
+      {n:'Delineador Bruna Tavares',    val:12000, giro:24}
     ]},
-    { n:'Cabelos', val:96800, giro:22, cob:1.1, produtos:[
-      {n:'Shampoo TRESemmé',            val:15600, giro:16},
-      {n:'Condicionador Pantene',       val:12800, giro:18},
-      {n:'Máscara Capilar Elseve',      val:18400, giro:20},
-      {n:'Óleo Capilar Amend',          val:11200, giro:24},
-      {n:'Creme de Pentear Salon Line', val:9800,  giro:22},
-      {n:'Tintura Garnier',             val:14200, giro:25},
-      {n:'Spray Finalizador Wella',     val:8100,  giro:28},
-      {n:'Shampoo Seco Kérastase',      val:6700,  giro:19}
+    { n:'Cabelos', val:246000, giro:22, cob:1.1, produtos:[
+      {n:'Shampoo TRESemmé',            val:40000, giro:16},
+      {n:'Condicionador Pantene',       val:33000, giro:18},
+      {n:'Máscara Capilar Elseve',      val:47000, giro:20},
+      {n:'Óleo Capilar Amend',          val:29000, giro:24},
+      {n:'Creme de Pentear Salon Line', val:25000, giro:22},
+      {n:'Tintura Garnier',             val:36000, giro:25},
+      {n:'Spray Finalizador Wella',     val:21000, giro:28},
+      {n:'Shampoo Seco Kérastase',      val:17000, giro:19}
     ]},
-    { n:'Perfumaria', val:142300, giro:48, cob:2.1, produtos:[
-      {n:'Perfume Natura Essencial',    val:28400, giro:42},
-      {n:'Colônia O Boticário',         val:22100, giro:38},
-      {n:'Perfume Egeo O.Boticário',    val:18900, giro:52},
-      {n:'Desodorante Rexona',          val:12600, giro:28},
-      {n:'Perfume Avon Far Away',       val:24800, giro:65},
-      {n:'Colônia Giovanna Baby',       val:8200,  giro:44},
-      {n:'Perfume Mahogany',            val:15400, giro:58},
-      {n:'Body Splash Viv!',            val:11900, giro:36}
+    { n:'Perfumaria', val:362000, giro:48, cob:2.1, produtos:[
+      {n:'Perfume Natura Essencial',    val:72000, giro:42},
+      {n:'Colônia O Boticário',         val:56000, giro:38},
+      {n:'Perfume Egeo O.Boticário',    val:48000, giro:52},
+      {n:'Desodorante Rexona',          val:32000, giro:28},
+      {n:'Perfume Avon Far Away',       val:63000, giro:65},
+      {n:'Colônia Giovanna Baby',       val:21000, giro:44},
+      {n:'Perfume Mahogany',            val:39000, giro:58},
+      {n:'Body Splash Viv!',            val:30000, giro:36}
     ]},
-    { n:'Higiene Pessoal', val:38200, giro:18, cob:0.7, produtos:[
-      {n:'Sabonete Dove',               val:6800,  giro:12},
-      {n:'Creme Hidratante Nivea',      val:8900,  giro:16},
-      {n:'Protetor Solar Episol',       val:7200,  giro:22},
-      {n:'Esfoliante Dermachem',        val:4800,  giro:20},
-      {n:'Shampoo Elsève',              val:5400,  giro:14},
-      {n:'Absorvente Always',           val:5100,  giro:14}
+    { n:'Higiene Pessoal', val:97000, giro:18, cob:0.7, produtos:[
+      {n:'Sabonete Dove',               val:17000, giro:12},
+      {n:'Creme Hidratante Nivea',      val:23000, giro:16},
+      {n:'Protetor Solar Episol',       val:18000, giro:22},
+      {n:'Esfoliante Dermachem',        val:12000, giro:20},
+      {n:'Shampoo Elsève',              val:14000, giro:14},
+      {n:'Absorvente Always',           val:13000, giro:14}
     ]},
-    { n:'Profissional', val:187600, giro:94, cob:4.8, produtos:[
-      {n:'Tinta Profissional Wella',           val:42600, giro:78},
-      {n:'Queratina Brazilian Blowout',        val:38400, giro:112},
-      {n:'Selante Capilar Cadiveu',            val:28900, giro:95},
-      {n:'Progressiva Inoar',                  val:32100, giro:88},
-      {n:'Kit Botox Capilar',                  val:24800, giro:102},
-      {n:'Shampoo Antirresíduo Schwarzkopf',   val:12600, giro:64},
-      {n:'Máscara Profissional Alfaparf',       val:8200,  giro:86}
+    { n:'Profissional', val:478000, giro:94, cob:4.8, produtos:[
+      {n:'Tinta Profissional Wella',           val:108000, giro:78},
+      {n:'Queratina Brazilian Blowout',        val:98000,  giro:112},
+      {n:'Selante Capilar Cadiveu',            val:74000,  giro:95},
+      {n:'Progressiva Inoar',                  val:82000,  giro:88},
+      {n:'Kit Botox Capilar',                  val:63000,  giro:102},
+      {n:'Shampoo Antirresíduo Schwarzkopf',   val:32000,  giro:64},
+      {n:'Máscara Profissional Alfaparf',       val:21000,  giro:86}
     ]}
   ],
   reps: [
-    { id:1, nome:'Fernanda Oliveira', reg:'Pato Branco/PR', fat:98500,  meta:100000, cli:68, margem:40, loja:'pb',
-      fm:[72000,78500,82000,88900,94200,98500], mm:[85000,87000,89000,92000,96000,100000],
-      cats:[{n:'Cosméticos/Maquiagem',fat:31200,margem:43},{n:'Cabelos',fat:24800,margem:40},{n:'Perfumaria',fat:19600,margem:39},{n:'Higiene Pessoal',fat:14200,margem:35},{n:'Profissional',fat:8700,margem:28}],
-      clis:[{n:'Farmácia Bem Estar',fat:18400,c:'Atacado'},{n:'Salão Glamour',fat:14200,c:'Profissional'},{n:'Perfumaria Bella',fat:12800,c:'Varejo'},{n:'Mercado Central',fat:11500,c:'Atacado'},{n:'Ótica Fashion',fat:9600,c:'Varejo'},{n:'Studio Beleza Total',fat:8900,c:'Profissional'},{n:'Drogaria Nortão',fat:7800,c:'Atacado'},{n:'Empório da Beleza',fat:6900,c:'Varejo'}]
+    { id:1, nome:'Fernanda Oliveira', reg:'Pato Branco/PR', fat:252000, meta:260000, cli:68, margem:40, loja:'pb',
+      fm:[199000,207000,219000,227000,235000,252000], mm:[210000,220000,228000,236000,245000,260000],
+      cats:[{n:'Cosméticos/Maquiagem',fat:80000,margem:43},{n:'Cabelos',fat:63000,margem:40},{n:'Perfumaria',fat:50000,margem:39},{n:'Higiene Pessoal',fat:36000,margem:35},{n:'Profissional',fat:23000,margem:28}],
+      clis:[{n:'Farmácia Bem Estar',fat:47000,c:'Atacado'},{n:'Salão Glamour',fat:36000,c:'Profissional'},{n:'Perfumaria Bella',fat:33000,c:'Varejo'},{n:'Mercado Central',fat:29000,c:'Atacado'},{n:'Ótica Fashion',fat:25000,c:'Varejo'},{n:'Studio Beleza Total',fat:23000,c:'Profissional'},{n:'Drogaria Nortão',fat:20000,c:'Atacado'},{n:'Empório da Beleza',fat:18000,c:'Varejo'}]
     },
-    { id:2, nome:'Camila Santos', reg:'Chapecó/SC', fat:112400, meta:110000, cli:74, margem:43, loja:'cpo',
-      fm:[82000,88900,94200,99800,106500,112400], mm:[90000,92000,95000,100000,105000,110000],
-      cats:[{n:'Cosméticos/Maquiagem',fat:38900,margem:46},{n:'Cabelos',fat:29800,margem:43},{n:'Perfumaria',fat:22100,margem:40},{n:'Higiene Pessoal',fat:14200,margem:37},{n:'Profissional',fat:7400,margem:32}],
-      clis:[{n:'Drogaria Saúde Total',fat:22100,c:'Atacado'},{n:'Studio Cabelo & Arte',fat:18900,c:'Profissional'},{n:'Cosméticos VIP',fat:16400,c:'Varejo'},{n:'Supermercado Norte',fat:14200,c:'Atacado'},{n:'Salão Espaço Beleza',fat:12800,c:'Profissional'},{n:'Perfumaria da Praça',fat:10900,c:'Varejo'},{n:'Farmácia Familiar',fat:9200,c:'Atacado'},{n:'Beauty Store',fat:7900,c:'Varejo'}]
+    { id:2, nome:'Camila Santos', reg:'Chapecó/SC', fat:286000, meta:280000, cli:74, margem:43, loja:'cpo',
+      fm:[210000,228000,241000,255000,272000,286000], mm:[222000,232000,244000,256000,270000,280000],
+      cats:[{n:'Cosméticos/Maquiagem',fat:99000,margem:46},{n:'Cabelos',fat:76000,margem:43},{n:'Perfumaria',fat:56000,margem:40},{n:'Higiene Pessoal',fat:36000,margem:37},{n:'Profissional',fat:19000,margem:32}],
+      clis:[{n:'Drogaria Saúde Total',fat:56000,c:'Atacado'},{n:'Studio Cabelo & Arte',fat:48000,c:'Profissional'},{n:'Cosméticos VIP',fat:42000,c:'Varejo'},{n:'Supermercado Norte',fat:36000,c:'Atacado'},{n:'Salão Espaço Beleza',fat:33000,c:'Profissional'},{n:'Perfumaria da Praça',fat:28000,c:'Varejo'},{n:'Farmácia Familiar',fat:23000,c:'Atacado'},{n:'Beauty Store',fat:20000,c:'Varejo'}]
     },
-    { id:3, nome:'Ricardo Borges', reg:'Francisco Beltrão/PR', fat:89200, meta:95000, cli:61, margem:37, loja:'fb',
-      fm:[68000,72500,76800,80200,84900,89200], mm:[78000,80000,82000,85000,90000,95000],
-      cats:[{n:'Cosméticos/Maquiagem',fat:24600,margem:41},{n:'Cabelos',fat:22800,margem:38},{n:'Perfumaria',fat:19400,margem:36},{n:'Higiene Pessoal',fat:14200,margem:33},{n:'Profissional',fat:8200,margem:27}],
-      clis:[{n:'Farmácia Popular',fat:19200,c:'Atacado'},{n:'Bazar da Beleza',fat:15600,c:'Varejo'},{n:'Mercadinho São José',fat:13400,c:'Atacado'},{n:'Depósito Cosméticos',fat:11800,c:'Atacado'},{n:'Loja das Fragrâncias',fat:9200,c:'Varejo'},{n:'Salão Belo Corte',fat:8100,c:'Profissional'},{n:'Perfumaria Chique',fat:6900,c:'Varejo'},{n:'Mercado Boa Vista',fat:5000,c:'Atacado'}]
+    { id:3, nome:'Ricardo Borges', reg:'Francisco Beltrão/PR', fat:227000, meta:240000, cli:61, margem:37, loja:'fb',
+      fm:[179000,185000,196000,205000,216000,227000], mm:[192000,200000,208000,218000,230000,240000],
+      cats:[{n:'Cosméticos/Maquiagem',fat:63000,margem:41},{n:'Cabelos',fat:58000,margem:38},{n:'Perfumaria',fat:49000,margem:36},{n:'Higiene Pessoal',fat:36000,margem:33},{n:'Profissional',fat:21000,margem:27}],
+      clis:[{n:'Farmácia Popular',fat:49000,c:'Atacado'},{n:'Bazar da Beleza',fat:40000,c:'Varejo'},{n:'Mercadinho São José',fat:34000,c:'Atacado'},{n:'Depósito Cosméticos',fat:30000,c:'Atacado'},{n:'Loja das Fragrâncias',fat:23000,c:'Varejo'},{n:'Salão Belo Corte',fat:21000,c:'Profissional'},{n:'Perfumaria Chique',fat:18000,c:'Varejo'},{n:'Mercado Boa Vista',fat:12000,c:'Atacado'}]
     },
-    { id:4, nome:'Patrícia Lima', reg:'Dois Vizinhos/PR', fat:104800, meta:100000, cli:71, margem:41, loja:'pb',
-      fm:[79000,84200,88900,94500,99800,104800], mm:[82000,85000,88000,92000,96000,100000],
-      cats:[{n:'Cosméticos/Maquiagem',fat:32400,margem:44},{n:'Cabelos',fat:28200,margem:41},{n:'Perfumaria',fat:22800,margem:39},{n:'Higiene Pessoal',fat:13900,margem:36},{n:'Profissional',fat:7500,margem:29}],
-      clis:[{n:'Drogaria Nobre',fat:24500,c:'Atacado'},{n:'Salão Princesa',fat:19800,c:'Profissional'},{n:'Perfumaria Elite',fat:17200,c:'Varejo'},{n:'Empório Beleza',fat:15900,c:'Varejo'},{n:'Studio Hair Pro',fat:12400,c:'Profissional'},{n:'Farmácia Dois Vizinhos',fat:10200,c:'Atacado'},{n:'Loja Cosméticos & Mais',fat:8900,c:'Varejo'},{n:'Bazar Tudo Belo',fat:6900,c:'Varejo'}]
+    { id:4, nome:'Patrícia Lima', reg:'Dois Vizinhos/PR', fat:268000, meta:255000, cli:71, margem:41, loja:'pb',
+      fm:[200000,213000,225000,239000,251000,268000], mm:[208000,218000,228000,242000,256000,255000],
+      cats:[{n:'Cosméticos/Maquiagem',fat:83000,margem:44},{n:'Cabelos',fat:72000,margem:41},{n:'Perfumaria',fat:58000,margem:39},{n:'Higiene Pessoal',fat:36000,margem:36},{n:'Profissional',fat:19000,margem:29}],
+      clis:[{n:'Drogaria Nobre',fat:63000,c:'Atacado'},{n:'Salão Princesa',fat:51000,c:'Profissional'},{n:'Perfumaria Elite',fat:44000,c:'Varejo'},{n:'Empório Beleza',fat:41000,c:'Varejo'},{n:'Studio Hair Pro',fat:32000,c:'Profissional'},{n:'Farmácia Dois Vizinhos',fat:26000,c:'Atacado'},{n:'Loja Cosméticos & Mais',fat:23000,c:'Varejo'},{n:'Bazar Tudo Belo',fat:18000,c:'Varejo'}]
     },
-    { id:5, nome:'André Costa', reg:'Palmas/PR', fat:82420, meta:115000, cli:38, margem:32, loja:'fb',
-      fm:[68000,71200,74800,77900,80100,82420], mm:[95000,98000,100000,105000,110000,115000],
-      cats:[{n:'Cosméticos/Maquiagem',fat:11400,margem:36},{n:'Cabelos',fat:15600,margem:33},{n:'Perfumaria',fat:14807,margem:30},{n:'Higiene Pessoal',fat:15800,margem:31},{n:'Profissional',fat:24813,margem:26}],
-      clis:[{n:'Farmácia Vida',fat:16800,c:'Atacado'},{n:'Bazar Mix',fat:13200,c:'Varejo'},{n:'Mercado Bom Preço',fat:11600,c:'Atacado'},{n:'Loja Beleza & Cia',fat:10900,c:'Varejo'},{n:'Salão Corte & Arte',fat:8920,c:'Profissional'},{n:'Farmácia Palmas',fat:7400,c:'Atacado'},{n:'Beauty Mix',fat:6800,c:'Varejo'},{n:'Empório do Bem',fat:6800,c:'Varejo'}]
+    { id:5, nome:'André Costa', reg:'Palmas/PR', fat:207000, meta:308000, cli:38, margem:32, loja:'fb',
+      fm:[192000,187000,199000,194000,189000,207000], mm:[250000,262000,272000,284000,295000,308000],
+      cats:[{n:'Cosméticos/Maquiagem',fat:29000,margem:36},{n:'Cabelos',fat:39000,margem:33},{n:'Perfumaria',fat:37000,margem:30},{n:'Higiene Pessoal',fat:40000,margem:31},{n:'Profissional',fat:62000,margem:26}],
+      clis:[{n:'Farmácia Vida',fat:42000,c:'Atacado'},{n:'Bazar Mix',fat:33000,c:'Varejo'},{n:'Mercado Bom Preço',fat:29000,c:'Atacado'},{n:'Loja Beleza & Cia',fat:27000,c:'Varejo'},{n:'Salão Corte & Arte',fat:22000,c:'Profissional'},{n:'Farmácia Palmas',fat:19000,c:'Atacado'},{n:'Beauty Mix',fat:17000,c:'Varejo'},{n:'Empório do Bem',fat:17000,c:'Varejo'}]
     }
   ]
 };
@@ -608,7 +605,7 @@ function loginDiretoria(){
   show('app-screen');
   computeFD();
   document.getElementById('dir-sub').textContent = (FD.todos?FD.mesLabel:FD.mesLabel+'/2026')+' · '+FD.lojaLabel;
-  buildDirKPIs(); buildDirCharts(); buildRepTable(); buildAllCli(); buildCatTable(); buildEstoque(); buildEstoqueTab();
+  buildDirKPIs(); buildDirCharts(); buildRepTable(); buildAllCli(); buildCatTable(); buildEstoqueTab();
 }
 
 function buildDirKPIs(){
