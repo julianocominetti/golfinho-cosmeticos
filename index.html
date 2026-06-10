@@ -893,13 +893,14 @@ function buildDRE(){
     {n:'Lucro Líquido Estimado',                   v:d.ll,   tp: d.ll>=0?'res':'res-neg'}
   ];
 
+  const fmtN = v => Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   let h='<table><tr><th>Conta</th><th style="text-align:right">Valor (R$)</th><th style="text-align:right">% Rec. Líquida</th></tr>';
   rows.forEach(r=>{
     const pctVal = (Math.abs(r.v)/d.rl*100).toFixed(2);
-    const sinal = r.v < 0 ? '-' : '';
+    const sinal = r.v < 0 ? '- ' : '';
     h+=`<tr class="${r.tp}">
       <td>${r.n}</td>
-      <td style="text-align:right;font-variant-numeric:tabular-nums">${sinal}${fmtM(Math.abs(r.v)).replace('R$ ','R$&nbsp;')}</td>
+      <td style="text-align:right;font-variant-numeric:tabular-nums">${sinal}${fmtN(r.v)}</td>
       <td style="text-align:right" class="dre-pct">${sinal}${pctVal}%</td>
     </tr>`;
   });
