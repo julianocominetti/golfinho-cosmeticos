@@ -467,6 +467,9 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
           <div class="ch"><canvas id="ch-r-men"></canvas></div>
         </div>
       </div>
+      <div class="sec-hd" style="margin-top:4px">Top Clientes</div>
+      <p style="font-size:13px;color:var(--mu);margin-bottom:12px">Clique para ver detalhes e produtos na aba Meus Clientes</p>
+      <div class="table-wrap" id="rep-top-cli"></div>
     </div>
 
     <div id="rep-tab-rcat" class="tab-panel">
@@ -484,7 +487,7 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
       <div class="drill" id="rep-cli-drill" style="margin-top:16px">
         <div class="drill-hd">
           <div class="drill-title" id="rep-cli-drill-title"></div>
-          <button class="drill-x" onclick="document.getElementById('rep-cli-drill').classList.remove('open')">✕</button>
+          <button class="drill-x" onclick="document.getElementById('rep-cli-drill').classList.remove('open');document.getElementById('rep-cli-dev').style.display='none'">✕</button>
         </div>
         <div class="kpi-grid" id="rep-cli-drill-kpis" style="margin-bottom:16px"></div>
         <div class="drill-grid">
@@ -494,6 +497,7 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
           </div>
           <div id="rep-cli-prods" style="overflow-y:auto;max-height:300px;display:flex;flex-direction:column;gap:12px"></div>
         </div>
+        <div id="rep-cli-dev" style="margin-top:18px;display:none"></div>
       </div>
     </div>
 
@@ -1483,6 +1487,28 @@ function buildRepDash(r){
 
   buildRepAlertas(r);
   document.getElementById('rep-cli-drill').classList.remove('open');
+  // Top Clientes em Minha Produção
+  const _cMarg = {Atacado: r.margem-1, Varejo: r.margem+2, Profissional: r.margem-3};
+  const _topClis = [...r.clis].sort((a,b)=>b.fat-a.fat).slice(0,10);
+  let htop='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Faturamento</th><th>Margem</th><th>Devoluções</th><th>% Dev.</th></tr>';
+  _topClis.forEach((c,i)=>{
+    const cm = _cMarg[c.c] ?? r.margem;
+    const [cc]=mStat(cm);
+    const cliIdx=r.clis.indexOf(c);
+    const devBadge=c.dev?`<span class="badge b-da">${fmt(c.dev)}</span>`:'<span style="color:#ccc">—</span>';
+    const devPct=c.dev?((c.dev/c.fat)*100).toFixed(1)+'%':'—';
+    htop+=`<tr class="clickable" onclick="goToClientDrill(${r.id},${cliIdx})">
+      <td>${i+1}</td><td><strong>${c.n}</strong></td>
+      <td><span class="badge b-ch">${c.c}</span></td>
+      <td>${fmt(c.fat)}</td>
+      <td><span class="badge ${cc}">${cm}%</span></td>
+      <td>${devBadge}</td>
+      <td style="font-size:12px;color:${c.dev?'#c62828':'#ccc'}">${devPct}</td>
+    </tr>`;
+  });
+  htop+='</table>';
+  document.getElementById('rep-top-cli').innerHTML=htop;
+
   document.getElementById('rep-cli-hd').textContent='Seus Principais Clientes';
   let h='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Faturamento</th><th>Última Compra</th></tr>';
   r.clis.forEach((c,i)=>{
@@ -1626,6 +1652,17 @@ function getClientCompras(rep, cli){
   }).filter(c => c.val > 0);
 }
 
+function goToClientDrill(repId, cliIdx){
+  const screen = document.getElementById('rep-screen');
+  screen.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  screen.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('rep-tab-rcli').classList.add('active');
+  // ativa botão "Meus Clientes" (índice 2)
+  screen.querySelectorAll('.tab-btn')[2].classList.add('active');
+  openRepCliDrill(repId, cliIdx);
+  document.getElementById('rep-tab-rcli').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
 function openRepCliDrill(repId, cliIdx){
   const rep = D.reps.find(r => r.id === repId);
   const cli = rep.clis[cliIdx];
@@ -1700,6 +1737,49 @@ function openRepCliDrill(repId, cliIdx){
     </div>`;
   }).join('');
   document.getElementById('rep-cli-prods').innerHTML = prods;
+
+  // KPI devolução
+  if(cli.dev){
+    document.getElementById('rep-cli-drill-kpis').innerHTML +=
+      `<div class="kpi-card da">
+        <div class="kpi-label">Devoluções</div>
+        <div class="kpi-value">${fmt(cli.dev)}</div>
+        <div class="kpi-sub">${((cli.dev/cli.fat)*100).toFixed(1)}% do faturamento</div>
+      </div>`;
+  }
+
+  // Devoluções por produto
+  const repDevEl = document.getElementById('rep-cli-dev');
+  if(cli.dev && cli.dev_prods){
+    repDevEl.innerHTML = `
+      <div style="background:#FFEBEE;border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+        <strong style="color:#c62828;font-size:14px">⚠️ Produtos Devolvidos</strong>
+        <span style="color:#c62828;font-weight:700;font-size:14px">${fmt(cli.dev)} &nbsp;<span style="font-size:12px;font-weight:400">(${((cli.dev/cli.fat)*100).toFixed(1)}% do fat.)</span></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr style="background:#c62828">
+              <th style="padding:9px 14px;color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.5px;text-align:left">Produto Devolvido</th>
+              <th style="padding:9px 14px;color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.5px;text-align:right">Valor</th>
+              <th style="padding:9px 14px;color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.5px;text-align:right">% Dev.</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${cli.dev_prods.map(p=>`<tr>
+              <td style="padding:8px 14px;border-bottom:1px solid #ffd0d0;font-size:13px">❌ ${p.n}</td>
+              <td style="padding:8px 14px;border-bottom:1px solid #ffd0d0;font-size:13px;text-align:right;color:#c62828;font-weight:700">${fmt(p.val)}</td>
+              <td style="padding:8px 14px;border-bottom:1px solid #ffd0d0;font-size:12px;text-align:right;color:#999">${((p.val/cli.dev)*100).toFixed(0)}%</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    repDevEl.style.display='block';
+  } else {
+    repDevEl.innerHTML='<div style="background:#E8F5E9;border-radius:10px;padding:12px 16px;color:#2e7d32;font-weight:600;font-size:13px">✅ Nenhuma devolução registrada</div>';
+    repDevEl.style.display='block';
+  }
+
   drill.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
