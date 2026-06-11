@@ -1503,17 +1503,21 @@ function openDirCliDrill(repId, cliIdx){
           <span class="badge ${cc}">${c.margem}%</span>
         </div>
       </div>
-      <table style="width:100%;border-collapse:collapse">
-        <tr style="background:#E0F7FA">
-          <th style="padding:7px 12px;font-size:11px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:left">Produto</th>
-          <th style="padding:7px 12px;font-size:11px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:right">Faturamento</th>
-          <th style="padding:7px 12px;font-size:11px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:right">Margem</th>
-        </tr>
-        ${c.produtos.map(p=>`<tr>
-          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px">${p.n}</td>
-          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;font-weight:600">${fmt(p.val)}</td>
-          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;color:var(--p);font-weight:600">${c.margem}%</td>
-        </tr>`).join('')}
+      <table style="width:100%;border-collapse:collapse;margin-top:2px">
+        <thead>
+          <tr style="background:#007B8E">
+            <th style="padding:8px 12px;font-size:11px;color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:.6px;text-align:left">Produto</th>
+            <th style="padding:8px 12px;font-size:11px;color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:.6px;text-align:right">Faturamento</th>
+            <th style="padding:8px 12px;font-size:11px;color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:.6px;text-align:right">Margem</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${c.produtos.map(p=>`<tr>
+            <td style="padding:7px 12px;border-bottom:1px solid #f0f0f0;font-size:12px">${p.n}</td>
+            <td style="padding:7px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;font-weight:600">${fmt(p.val)}</td>
+            <td style="padding:7px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;color:var(--p);font-weight:700">${c.margem}%</td>
+          </tr>`).join('')}
+        </tbody>
       </table>
     </div>`;
   }).join('');
@@ -1590,17 +1594,21 @@ function openRepCliDrill(repId, cliIdx){
           <span class="badge ${cc}">${c.margem}%</span>
         </div>
       </div>
-      <table style="width:100%;border-collapse:collapse">
-        <tr style="background:#E0F7FA">
-          <th style="padding:7px 12px;font-size:11px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:left">Produto</th>
-          <th style="padding:7px 12px;font-size:11px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:right">Faturamento</th>
-          <th style="padding:7px 12px;font-size:11px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:right">Margem</th>
-        </tr>
-        ${c.produtos.map(p=>`<tr>
-          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px">${p.n}</td>
-          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;font-weight:600">${fmt(p.val)}</td>
-          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;color:var(--p);font-weight:600">${c.margem}%</td>
-        </tr>`).join('')}
+      <table style="width:100%;border-collapse:collapse;margin-top:2px">
+        <thead>
+          <tr style="background:#007B8E">
+            <th style="padding:8px 12px;font-size:11px;color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:.6px;text-align:left">Produto</th>
+            <th style="padding:8px 12px;font-size:11px;color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:.6px;text-align:right">Faturamento</th>
+            <th style="padding:8px 12px;font-size:11px;color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:.6px;text-align:right">Margem</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${c.produtos.map(p=>`<tr>
+            <td style="padding:7px 12px;border-bottom:1px solid #f0f0f0;font-size:12px">${p.n}</td>
+            <td style="padding:7px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;font-weight:600">${fmt(p.val)}</td>
+            <td style="padding:7px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;color:var(--p);font-weight:700">${c.margem}%</td>
+          </tr>`).join('')}
+        </tbody>
       </table>
     </div>`;
   }).join('');
