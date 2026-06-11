@@ -490,6 +490,10 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
           <button class="drill-x" onclick="document.getElementById('rep-cli-drill').classList.remove('open');document.getElementById('rep-cli-dev').style.display='none'">✕</button>
         </div>
         <div class="kpi-grid" id="rep-cli-drill-kpis" style="margin-bottom:16px"></div>
+        <div class="chart-card" style="margin-bottom:14px">
+          <div class="chart-title" id="ch-cli-mensal-title">Evolução Mensal do Cliente</div>
+          <div class="ch"><canvas id="ch-cli-mensal"></canvas></div>
+        </div>
         <div class="drill-grid">
           <div class="chart-card">
             <div class="chart-title">Distribuição por Categoria</div>
@@ -1698,7 +1702,25 @@ function openRepCliDrill(repId, cliIdx){
       <div class="kpi-sub"><span class="badge ${cli.dias>=45?'b-da':'b-wa'}">${cli.dias>=45?'Crítico':'Atenção'}</span></div>
     </div>` : ''}`;
 
-  // Gráfico
+  // Gráfico evolução mensal do cliente
+  const mesVal  = document.getElementById('rep-sel-mes')?.value ?? '5';
+  const rTodos  = mesVal === 'todos';
+  const rMes    = rTodos ? 5 : parseInt(mesVal);
+  const mesesShown = rTodos ? D.meses : D.meses.slice(0, rMes+1);
+  const cliShare   = rep.fat > 0 ? cli.fat / rep.fat : 0;
+  const cliMensal  = (rTodos ? rep.fm : rep.fm.slice(0, rMes+1)).map(m => Math.round(m * cliShare));
+
+  document.getElementById('ch-cli-mensal-title').textContent = 'Evolução Mensal — '+cli.n;
+  mkChart('ch-cli-mensal',{type:'bar',data:{labels:mesesShown,datasets:[
+    {label:'Faturamento',data:cliMensal,backgroundColor:'#007B8ECC',borderRadius:5,datalabels:DL_BAR}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:22}},
+    plugins:{datalabels:{},legend:{display:false},
+      tooltip:{callbacks:{label:c=>fmt(c.raw)}}},
+    scales:{y:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
+  });
+
+  // Gráfico categoria
   mkChart('ch-cli-cat',{type:'doughnut',data:{
     labels: compras.map(c=>c.cat),
     datasets:[{data:compras.map(c=>c.val),backgroundColor:CATS_C,borderWidth:0,datalabels:DL_PIE}]
