@@ -359,7 +359,22 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
 
     <div id="dir-tab-cli" class="tab-panel">
       <div class="sec-hd">Top Clientes — Consolidado</div>
+      <p style="font-size:13px;color:var(--mu);margin-bottom:14px">Clique em um cliente para ver categorias e produtos comprados</p>
       <div class="table-wrap" id="all-cli-tbl" style="margin-top:4px"></div>
+      <div class="drill" id="dir-cli-drill" style="margin-top:16px">
+        <div class="drill-hd">
+          <div class="drill-title" id="dir-cli-drill-title"></div>
+          <button class="drill-x" onclick="document.getElementById('dir-cli-drill').classList.remove('open')">✕</button>
+        </div>
+        <div class="kpi-grid" id="dir-cli-drill-kpis" style="margin-bottom:16px"></div>
+        <div class="drill-grid">
+          <div class="chart-card">
+            <div class="chart-title">Distribuição por Categoria</div>
+            <div class="ch"><canvas id="ch-dir-cli-cat"></canvas></div>
+          </div>
+          <div id="dir-cli-prods" style="overflow-y:auto;max-height:300px;display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+      </div>
     </div>
 
     <div id="dir-tab-estoque" class="tab-panel">
@@ -1316,13 +1331,18 @@ function openRepDrill(id){
 }
 
 function buildAllCli(){
+  document.getElementById('dir-cli-drill').classList.remove('open');
   const all=[];
-  FD.reps.forEach(r=>r.clis.forEach(c=>all.push({...c,rep:r.nome})));
+  FD.reps.forEach(r=>r.clis.forEach((c,i)=>all.push({...c,rep:r.nome,repId:r.id,cliIdx:i})));
   all.sort((a,b)=>b.fat-a.fat);
-  let h='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Representante</th><th>Faturamento</th></tr>';
+  let h='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Representante</th><th>Faturamento</th><th>Última Compra</th></tr>';
   all.slice(0,20).forEach((c,i)=>{
-    h+=`<tr><td>${i+1}</td><td><strong>${c.n}</strong></td>
-      <td><span class="badge b-ch">${c.c}</span></td><td>${c.rep}</td><td>${fmt(c.fat)}</td></tr>`;
+    const diasBadge=c.dias?`<span class="badge ${c.dias>=45?'b-da':'b-wa'}">${c.dias}d</span>`:'<span class="badge b-ok">Ativo</span>';
+    h+=`<tr class="clickable" onclick="openDirCliDrill(${c.repId},${c.cliIdx})">
+      <td>${i+1}</td><td><strong>${c.n}</strong></td>
+      <td><span class="badge b-ch">${c.c}</span></td><td>${c.rep}</td>
+      <td>${fmt(c.fat)}</td><td>${diasBadge}</td>
+    </tr>`;
   });
   h+='</table>';
   document.getElementById('all-cli-tbl').innerHTML=h;
@@ -1428,6 +1448,72 @@ function buildRepDash(r){
   });
   h+='</table>';
   document.getElementById('rep-cli-tbl').innerHTML=h;
+}
+
+function openDirCliDrill(repId, cliIdx){
+  const rep = D.reps.find(r => r.id === repId);
+  const cli = rep.clis[cliIdx];
+  const compras = getClientCompras(rep, cli);
+  const totalVal = compras.reduce((s,c)=>s+c.val,0);
+
+  const drill = document.getElementById('dir-cli-drill');
+  drill.classList.add('open');
+  document.getElementById('dir-cli-drill-title').textContent = '🛒 '+cli.n+' — Categorias & Produtos';
+
+  const topCat = [...compras].sort((a,b)=>b.val-a.val)[0];
+  const [mc,ml] = mStat(rep.margem);
+  document.getElementById('dir-cli-drill-kpis').innerHTML = `
+    <div class="kpi-card ok">
+      <div class="kpi-label">Total Comprado</div>
+      <div class="kpi-value">${fmt(cli.fat)}</div>
+      <div class="kpi-sub">Canal: ${cli.c}</div>
+    </div>
+    <div class="kpi-card in">
+      <div class="kpi-label">Categoria Principal</div>
+      <div class="kpi-value" style="font-size:17px">${topCat.cat}</div>
+      <div class="kpi-sub">${fmt(topCat.val)} · ${pct(topCat.val,totalVal)}</div>
+    </div>
+    <div class="kpi-card ${mc}">
+      <div class="kpi-label">Representante</div>
+      <div class="kpi-value" style="font-size:16px">${rep.nome.split(' ')[0]}</div>
+      <div class="kpi-sub">Margem ${rep.margem}% <span class="badge ${mc}">${ml}</span></div>
+    </div>
+    ${cli.dias?`<div class="kpi-card ${cli.dias>=45?'da':'wa'}">
+      <div class="kpi-label">Última Compra</div>
+      <div class="kpi-value">${cli.dias}d atrás</div>
+      <div class="kpi-sub"><span class="badge ${cli.dias>=45?'b-da':'b-wa'}">${cli.dias>=45?'Crítico':'Atenção'}</span></div>
+    </div>`:''}`;
+
+  mkChart('ch-dir-cli-cat',{type:'doughnut',data:{
+    labels:compras.map(c=>c.cat),
+    datasets:[{data:compras.map(c=>c.val),backgroundColor:CATS_C,borderWidth:0,datalabels:DL_PIE}]
+  },options:{responsive:true,maintainAspectRatio:false,cutout:'45%',
+    plugins:{datalabels:DL_PIE,legend:{position:'right',labels:{font:{size:11}}},
+      tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)+' ('+pct(c.raw,totalVal)+')'}}}}
+  });
+
+  document.getElementById('dir-cli-prods').innerHTML = compras.map(c=>{
+    const [cc]=mStat(c.margem);
+    return `<div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--al);border-radius:8px;margin-bottom:6px">
+        <strong style="font-size:13px">${c.cat}</strong>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="font-size:12px">${fmt(c.val)}</span>
+          <span class="badge b-ch">${pct(c.val,totalVal)}</span>
+          <span class="badge ${cc}">${c.margem}%</span>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        ${c.produtos.map(p=>`<tr>
+          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px">${p.n}</td>
+          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;font-weight:600">${fmt(p.val)}</td>
+          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:11px;text-align:right;color:var(--mu)">${pct(p.val,c.val)}</td>
+        </tr>`).join('')}
+      </table>
+    </div>`;
+  }).join('');
+
+  drill.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function getClientCompras(rep, cli){
