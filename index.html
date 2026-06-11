@@ -747,8 +747,8 @@ function buildDirCharts(){
   });
   // Lojas: faturamento + margem (sempre todas as lojas, mês filtrado)
   const _mes = FD.mesIdx >= 0 ? FD.mesIdx : 5;
-  const lojaMap = {pb:'Pato Branco\nMatriz', fb:'Francisco Beltrão\nFilial', cpo:'Chapecó SC\nFilial SC'};
-  const lojaData = ['pb','fb','cpo'].map(key => {
+  const _lojaNames = {pb:'Pato Branco', fb:'Fco. Beltrão', cpo:'Chapecó SC'};
+  const _lojaData = ['pb','fb','cpo'].map(key => {
     const rps = D.reps.filter(r => r.loja === key);
     const fat = FD.todos
       ? rps.reduce((s,r) => s + r.fm.reduce((a,b)=>a+b,0), 0)
@@ -759,30 +759,41 @@ function buildDirCharts(){
           return s + r.margem * rf;
         }, 0) / fat * 10) / 10
       : 0;
-    return {n: lojaMap[key], fat, margem: wmargem};
+    return {n: _lojaNames[key], fat, margem: wmargem};
   }).sort((a,b) => b.fat - a.fat);
 
+  const _margColors = _lojaData.map(l => l.margem>=42?'#2e7d32':l.margem>=36?'#007B8E':'#e65100');
+
   mkChart('ch-lojas',{type:'bar',data:{
-    labels: lojaData.map(l=>l.n),
+    labels: _lojaData.map(l=>l.n),
     datasets:[
-      { label:'Faturamento', data:lojaData.map(l=>l.fat),
+      { label:'Faturamento',
+        data: _lojaData.map(l=>l.fat),
         backgroundColor:['#007B8ECC','#26C6DACC','#4DB6ACCC'],
         borderRadius:6, yAxisID:'y',
-        datalabels:{anchor:'end',align:'top',formatter:v=>'R$'+(v/1000).toFixed(0)+'k',font:{size:10,weight:'bold'},color:'#005F6F'}
+        datalabels:{anchor:'end',align:'top',formatter:v=>'R$'+(v/1000).toFixed(0)+'k',
+          font:{size:10,weight:'bold'},color:'#005F6F',padding:2}
       },
-      { label:'Margem (%)', data:lojaData.map(l=>l.margem),
+      { label:'Margem (%)',
+        data: _lojaData.map(l=>l.margem),
         type:'line', borderColor:'#e65100', backgroundColor:'transparent',
-        pointBackgroundColor:lojaData.map(l=>l.margem>=42?'#2e7d32':l.margem>=36?'#007B8E':'#e65100'),
-        pointBorderColor:'#fff', pointBorderWidth:2, pointRadius:7,
-        borderWidth:2.5, yAxisID:'y2', tension:0.3,
-        datalabels:{anchor:'end',align:'top',formatter:v=>v+'%',font:{size:10,weight:'bold'},
-          color:(_,ctx)=>{const m=lojaData[ctx.dataIndex]?.margem||0;return m>=42?'#2e7d32':m>=36?'#007B8E':'#e65100';}}
+        pointBackgroundColor:_margColors, pointBorderColor:'#fff',
+        pointBorderWidth:2, pointRadius:8, borderWidth:2.5,
+        yAxisID:'y2', tension:0.3,
+        datalabels:{anchor:'end',align:'top',
+          formatter:v=>v+'%',
+          font:{size:10,weight:'bold'},
+          color:ctx=>_margColors[ctx.dataIndex]||'#e65100',
+          padding:2}
       }
     ]
   },options:{responsive:true,maintainAspectRatio:false,
-    layout:{padding:{top:30}},
-    plugins:{datalabels:{},legend:{position:'top'},
-      tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.datasetIndex===0?fmt(c.raw):c.raw+'%')}}},
+    layout:{padding:{top:34}},
+    plugins:{
+      datalabels:{},
+      legend:{position:'top'},
+      tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.datasetIndex===0?fmt(c.raw):c.raw+'%')}}
+    },
     scales:{
       y:{position:'left',ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}},
       y2:{position:'right',min:20,max:55,grid:{drawOnChartArea:false},ticks:{callback:v=>v+'%'}}
