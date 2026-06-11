@@ -438,6 +438,21 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
     <button class="tab-btn"        onclick="setTab(this,'rep','rcli')">Meus Clientes</button>
     <button class="tab-btn"        onclick="setTab(this,'rep','ralert')">🚨 Alertas</button>
   </div>
+  <div class="filter-bar">
+    <div class="filter-group">
+      <span class="filter-label">Mês</span>
+      <select class="filter-select" id="rep-sel-mes" onchange="applyRepFilters()">
+        <option value="todos">Todos os Meses</option>
+        <option value="0">Janeiro</option>
+        <option value="1">Fevereiro</option>
+        <option value="2">Março</option>
+        <option value="3">Abril</option>
+        <option value="4">Maio</option>
+        <option value="5" selected>Junho</option>
+      </select>
+    </div>
+    <span class="filter-tag" id="rep-filter-tag">Junho/2026</span>
+  </div>
   <div class="tab-content">
 
     <div id="rep-tab-prod" class="tab-panel active">
@@ -459,6 +474,7 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
         <div class="chart-title">Faturamento por Categoria</div>
         <div class="ch tall"><canvas id="ch-r-cat"></canvas></div>
       </div>
+      <div id="rep-cat-tbl" style="margin-top:18px"></div>
     </div>
 
     <div id="rep-tab-rcli" class="tab-panel">
@@ -1365,29 +1381,59 @@ function showRepSelect(){
   document.getElementById('rep-list').innerHTML=h;
 }
 
+let currentRep = null;
+
+function applyRepFilters(){
+  if(!currentRep) return;
+  buildRepDash(currentRep);
+}
+
 function loginRep(id){
   const r=D.reps.find(x=>x.id===id);
+  currentRep = r;
   show('rep-screen');
+  document.getElementById('rep-sel-mes').value = '5';
+  document.getElementById('rep-filter-tag').textContent = 'Junho/2026';
   document.getElementById('rep-hd-title').textContent='Golfinho Cosméticos · '+r.nome;
-  document.getElementById('rep-hd-sub').textContent=r.reg+' · '+D.mes;
+  document.getElementById('rep-hd-sub').textContent=r.reg+' · Junho/2026';
   document.getElementById('rep-screen').querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===0));
   document.getElementById('rep-screen').querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   buildRepDash(r);
 }
 
 function buildRepDash(r){
-  const p=ap(r.fat,r.meta), pc=p>=100?'ok':p<80?'da':'';
+  // -- período selecionado --
+  const mesVal   = document.getElementById('rep-sel-mes')?.value ?? '5';
+  const rTodos   = mesVal === 'todos';
+  const rMes     = rTodos ? 5 : parseInt(mesVal);
+  const mesLabel = rTodos ? 'Jan–Jun' : D.meses[rMes];
+  const periodo  = mesLabel + (rTodos ? ' (Acumulado)' : '/2026');
+
+  const fat  = rTodos ? r.fm.reduce((a,b)=>a+b,0) : r.fm[rMes];
+  const meta = rTodos ? r.mm.reduce((a,b)=>a+b,0) : r.mm[rMes];
+  const mesesShown = rTodos ? D.meses : D.meses.slice(0, rMes+1);
+  const fat_m      = rTodos ? r.fm    : r.fm.slice(0, rMes+1);
+  const meta_m     = rTodos ? r.mm    : r.mm.slice(0, rMes+1);
+  const scale      = r.fat > 0 ? fat / r.fat : 1;
+  const sCats      = r.cats.map(c=>({...c, fat:Math.round(c.fat*scale)}));
+
+  // atualiza tags
+  const tagEl = document.getElementById('rep-filter-tag');
+  if(tagEl) tagEl.textContent = periodo;
+  document.getElementById('rep-hd-sub').textContent = r.reg + ' · ' + periodo;
+
+  const p=ap(fat,meta), pc=p>=100?'ok':p<80?'da':'';
   document.getElementById('rep-kpis').innerHTML=`
     <div class="kpi-card">
-      <div class="kpi-label">Faturamento Mês</div>
-      <div class="kpi-value">${fmt(r.fat)}</div>
-      <div class="kpi-sub">Meta: ${fmt(r.meta)}</div>
+      <div class="kpi-label">Faturamento ${rTodos?'Acumulado':'Mês'}</div>
+      <div class="kpi-value">${fmt(fat)}</div>
+      <div class="kpi-sub">Meta: ${fmt(meta)}</div>
       <div class="prog"><div class="prog-fill ${pc}" style="width:${Math.min(100,p)}%"></div></div>
     </div>
     <div class="kpi-card ac">
       <div class="kpi-label">Atingimento</div>
       <div class="kpi-value">${p}%</div>
-      <div class="kpi-sub">${D.mes}</div>
+      <div class="kpi-sub">${mesLabel}${rTodos?'':'/2026'}</div>
     </div>
     <div class="kpi-card ok">
       <div class="kpi-label">Clientes Ativos</div>
@@ -1396,8 +1442,8 @@ function buildRepDash(r){
     </div>
     <div class="kpi-card wa">
       <div class="kpi-label">Falta para Meta</div>
-      <div class="kpi-value">${fmt(Math.max(0,r.meta-r.fat))}</div>
-      <div class="kpi-sub">Este mês</div>
+      <div class="kpi-value">${fmt(Math.max(0,meta-fat))}</div>
+      <div class="kpi-sub">${mesLabel}${rTodos?'':'/2026'}</div>
     </div>
     <div class="kpi-card" style="border-left-color:${r.margem>=42?'#2e7d32':r.margem>=36?'#007B8E':'#e65100'}">
       <div class="kpi-label">Minha Margem</div>
@@ -1407,45 +1453,44 @@ function buildRepDash(r){
 
   mkChart('ch-r-ring',{type:'doughnut',data:{
     labels:['Realizado','A Atingir'],
-    datasets:[{data:[r.fat,Math.max(0,r.meta-r.fat)],backgroundColor:['#007B8E','#B2EBF2'],borderWidth:0,datalabels:DL_PIE}]},
+    datasets:[{data:[fat,Math.max(0,meta-fat)],backgroundColor:['#007B8E','#B2EBF2'],borderWidth:0,datalabels:DL_PIE}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'70%',
       plugins:{datalabels:DL_PIE,legend:{position:'bottom'},tooltip:{callbacks:{label:c=>fmt(c.raw)}}}}
   });
-  mkChart('ch-r-men',{type:'bar',data:{labels:D.meses,datasets:[
-    {label:'Faturamento',data:r.fm,backgroundColor:'#007B8ECC',borderRadius:4,datalabels:DL_BAR},
-    {label:'Meta',data:r.mm,type:'line',borderColor:'#e65100',backgroundColor:'transparent',
+  mkChart('ch-r-men',{type:'bar',data:{labels:mesesShown,datasets:[
+    {label:'Faturamento',data:fat_m,backgroundColor:'#007B8ECC',borderRadius:4,datalabels:DL_BAR},
+    {label:'Meta',data:meta_m,type:'line',borderColor:'#e65100',backgroundColor:'transparent',
       borderWidth:2,pointRadius:4,tension:.3,datalabels:DL_OFF}
   ]},options:{responsive:true,maintainAspectRatio:false,
     layout:{padding:{top:22}},
     plugins:{datalabels:{},legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},
     scales:{y:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
   });
-  mkChart('ch-r-cat',{type:'bar',data:{labels:r.cats.map(c=>c.n),datasets:[
-    {label:'Faturamento',data:r.cats.map(c=>c.fat),backgroundColor:CATS_C,borderRadius:5,
-      datalabels:{...DL_BARH,formatter:(v,ctx)=>'R$'+(v/1000).toFixed(0)+'k ('+pct(v,r.fat)+')'}}
+  mkChart('ch-r-cat',{type:'bar',data:{labels:sCats.map(c=>c.n),datasets:[
+    {label:'Faturamento',data:sCats.map(c=>c.fat),backgroundColor:CATS_C,borderRadius:5,
+      datalabels:{...DL_BARH,formatter:(v)=>'R$'+(v/1000).toFixed(0)+'k ('+pct(v,fat)+')'}}
   ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
     layout:{padding:{right:80}},
-    plugins:{datalabels:{},legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' ('+pct(c.raw,r.fat)+')'}}},
+    plugins:{datalabels:{},legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' ('+pct(c.raw,fat)+')'}}},
     scales:{x:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
   });
 
-  // tabela de categorias com margem (aba Categorias do representante)
+  // tabela categorias
   let hcat='<div style="overflow-x:auto"><table><tr><th>Categoria</th><th>Faturamento</th><th>Part.%</th><th>Margem</th><th>Status</th></tr>';
-  r.cats.forEach(c=>{ const [cc,cl]=mStat(c.margem); hcat+=`<tr><td><strong>${c.n}</strong></td><td>${fmt(c.fat)}</td><td>${pct(c.fat,r.fat)}</td><td><strong>${c.margem}%</strong></td><td><span class="badge ${cc}">${cl}</span></td></tr>`; });
+  sCats.forEach(c=>{ const [cc,cl]=mStat(c.margem); hcat+=`<tr><td><strong>${c.n}</strong></td><td>${fmt(c.fat)}</td><td>${pct(c.fat,fat)}</td><td><strong>${c.margem}%</strong></td><td><span class="badge ${cc}">${cl}</span></td></tr>`; });
   hcat+='</table></div>';
-  document.getElementById('rep-tab-rcat').insertAdjacentHTML('beforeend','<div style="margin-top:18px">'+hcat+'</div>');
+  document.getElementById('rep-cat-tbl').innerHTML=hcat;
 
   buildRepAlertas(r);
   document.getElementById('rep-cli-drill').classList.remove('open');
   document.getElementById('rep-cli-hd').textContent='Seus Principais Clientes';
   let h='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Faturamento</th><th>Última Compra</th></tr>';
   r.clis.forEach((c,i)=>{
-    const diasBadge = c.dias ? `<span class="badge ${c.dias>=45?'b-da':'b-wa'}">${c.dias}d</span>` : '<span class="badge b-ok">Ativo</span>';
+    const diasBadge=c.dias?`<span class="badge ${c.dias>=45?'b-da':'b-wa'}">${c.dias}d</span>`:'<span class="badge b-ok">Ativo</span>';
     h+=`<tr class="clickable" onclick="openRepCliDrill(${r.id},${i})">
       <td>${i+1}</td><td><strong>${c.n}</strong></td>
       <td><span class="badge b-ch">${c.c}</span></td>
-      <td>${fmt(c.fat)}</td>
-      <td>${diasBadge}</td>
+      <td>${fmt(c.fat)}</td><td>${diasBadge}</td>
     </tr>`;
   });
   h+='</table>';
