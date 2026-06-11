@@ -305,6 +305,10 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
           <div class="chart-title">Faturamento por Canal</div>
           <div class="ch"><canvas id="ch-canal"></canvas></div>
         </div>
+        <div class="chart-card">
+          <div class="chart-title">Faturamento & Margem por Loja</div>
+          <div class="ch"><canvas id="ch-lojas"></canvas></div>
+        </div>
         <div class="chart-card full">
           <div class="chart-title">Evolução Mensal 2026 vs Meta (R$)</div>
           <div class="ch tall"><canvas id="ch-mensal"></canvas></div>
@@ -741,6 +745,50 @@ function buildDirCharts(){
     plugins:{datalabels:{},legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},
     scales:{y:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
   });
+  // Lojas: faturamento + margem (sempre todas as lojas, mês filtrado)
+  const _mes = FD.mesIdx >= 0 ? FD.mesIdx : 5;
+  const lojaMap = {pb:'Pato Branco\nMatriz', fb:'Francisco Beltrão\nFilial', cpo:'Chapecó SC\nFilial SC'};
+  const lojaData = ['pb','fb','cpo'].map(key => {
+    const rps = D.reps.filter(r => r.loja === key);
+    const fat = FD.todos
+      ? rps.reduce((s,r) => s + r.fm.reduce((a,b)=>a+b,0), 0)
+      : rps.reduce((s,r) => s + r.fm[_mes], 0);
+    const wmargem = fat > 0
+      ? Math.round(rps.reduce((s,r) => {
+          const rf = FD.todos ? r.fm.reduce((a,b)=>a+b,0) : r.fm[_mes];
+          return s + r.margem * rf;
+        }, 0) / fat * 10) / 10
+      : 0;
+    return {n: lojaMap[key], fat, margem: wmargem};
+  }).sort((a,b) => b.fat - a.fat);
+
+  mkChart('ch-lojas',{type:'bar',data:{
+    labels: lojaData.map(l=>l.n),
+    datasets:[
+      { label:'Faturamento', data:lojaData.map(l=>l.fat),
+        backgroundColor:['#007B8ECC','#26C6DACC','#4DB6ACCC'],
+        borderRadius:6, yAxisID:'y',
+        datalabels:{anchor:'end',align:'top',formatter:v=>'R$'+(v/1000).toFixed(0)+'k',font:{size:10,weight:'bold'},color:'#005F6F'}
+      },
+      { label:'Margem (%)', data:lojaData.map(l=>l.margem),
+        type:'line', borderColor:'#e65100', backgroundColor:'transparent',
+        pointBackgroundColor:lojaData.map(l=>l.margem>=42?'#2e7d32':l.margem>=36?'#007B8E':'#e65100'),
+        pointBorderColor:'#fff', pointBorderWidth:2, pointRadius:7,
+        borderWidth:2.5, yAxisID:'y2', tension:0.3,
+        datalabels:{anchor:'end',align:'top',formatter:v=>v+'%',font:{size:10,weight:'bold'},
+          color:(_,ctx)=>{const m=lojaData[ctx.dataIndex]?.margem||0;return m>=42?'#2e7d32':m>=36?'#007B8E':'#e65100';}}
+      }
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:30}},
+    plugins:{datalabels:{},legend:{position:'top'},
+      tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.datasetIndex===0?fmt(c.raw):c.raw+'%')}}},
+    scales:{
+      y:{position:'left',ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}},
+      y2:{position:'right',min:20,max:55,grid:{drawOnChartArea:false},ticks:{callback:v=>v+'%'}}
+    }
+  }});
+
   mkChart('ch-margem',{type:'line',data:{labels:FD.meses_shown,datasets:[
     {label:'Margem Real (%)',data:FD.margem_m,borderColor:'#007B8E',backgroundColor:'rgba(0,123,142,.12)',
       borderWidth:2.5,pointRadius:5,pointBackgroundColor:FD.margem_m.map(v=>v>=42?'#2e7d32':v>=36?'#007B8E':'#e65100'),
