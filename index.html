@@ -1504,10 +1504,15 @@ function openDirCliDrill(repId, cliIdx){
         </div>
       </div>
       <table style="width:100%;border-collapse:collapse">
+        <tr style="background:#E0F7FA">
+          <th style="padding:7px 12px;font-size:11px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:left">Produto</th>
+          <th style="padding:7px 12px;font-size:11px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:right">Faturamento</th>
+          <th style="padding:7px 12px;font-size:11px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:right">Margem</th>
+        </tr>
         ${c.produtos.map(p=>`<tr>
           <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px">${p.n}</td>
           <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;font-weight:600">${fmt(p.val)}</td>
-          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:11px;text-align:right;color:var(--mu)">${pct(p.val,c.val)}</td>
+          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;color:var(--p);font-weight:600">${c.margem}%</td>
         </tr>`).join('')}
       </table>
     </div>`;
@@ -1586,10 +1591,15 @@ function openRepCliDrill(repId, cliIdx){
         </div>
       </div>
       <table style="width:100%;border-collapse:collapse">
+        <tr style="background:#E0F7FA">
+          <th style="padding:7px 12px;font-size:11px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:left">Produto</th>
+          <th style="padding:7px 12px;font-size:11px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:right">Faturamento</th>
+          <th style="padding:7px 12px;font-size:11px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:right">Margem</th>
+        </tr>
         ${c.produtos.map(p=>`<tr>
           <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px">${p.n}</td>
           <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;font-weight:600">${fmt(p.val)}</td>
-          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:11px;text-align:right;color:var(--mu)">${pct(p.val,c.val)}</td>
+          <td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;text-align:right;color:var(--p);font-weight:600">${c.margem}%</td>
         </tr>`).join('')}
       </table>
     </div>`;
