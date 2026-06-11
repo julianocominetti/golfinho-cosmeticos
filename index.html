@@ -364,7 +364,7 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
       <div class="drill" id="dir-cli-drill" style="margin-top:16px">
         <div class="drill-hd">
           <div class="drill-title" id="dir-cli-drill-title"></div>
-          <button class="drill-x" onclick="document.getElementById('dir-cli-drill').classList.remove('open')">✕</button>
+          <button class="drill-x" onclick="document.getElementById('dir-cli-drill').classList.remove('open');document.getElementById('dir-cli-dev').style.display='none'">✕</button>
         </div>
         <div class="kpi-grid" id="dir-cli-drill-kpis" style="margin-bottom:16px"></div>
         <div class="drill-grid">
@@ -374,6 +374,7 @@ tr.clickable:hover td{background:#F0FBFC;cursor:pointer;}
           </div>
           <div id="dir-cli-prods" style="overflow-y:auto;max-height:300px;display:flex;flex-direction:column;gap:12px"></div>
         </div>
+        <div id="dir-cli-dev" style="margin-top:18px;display:none"></div>
       </div>
     </div>
 
@@ -561,27 +562,27 @@ const D = {
     { id:1, nome:'Fernanda Oliveira', reg:'Pato Branco/PR', fat:252000, meta:260000, cli:68, margem:40, loja:'pb',
       fm:[199000,207000,219000,227000,235000,252000], mm:[210000,220000,228000,236000,245000,260000],
       cats:[{n:'Cosméticos/Maquiagem',fat:80000,margem:43},{n:'Cabelos',fat:63000,margem:40},{n:'Perfumaria',fat:50000,margem:39},{n:'Higiene Pessoal',fat:36000,margem:35},{n:'Profissional',fat:23000,margem:28}],
-      clis:[{n:'Farmácia Bem Estar',fat:47000,c:'Atacado'},{n:'Salão Glamour',fat:36000,c:'Profissional'},{n:'Perfumaria Bella',fat:33000,c:'Varejo'},{n:'Mercado Central',fat:29000,c:'Atacado'},{n:'Ótica Fashion',fat:25000,c:'Varejo'},{n:'Studio Beleza Total',fat:23000,c:'Profissional'},{n:'Drogaria Nortão',fat:20000,c:'Atacado',dias:34},{n:'Empório da Beleza',fat:18000,c:'Varejo',dias:28}]
+      clis:[{n:'Farmácia Bem Estar',fat:47000,c:'Atacado',dev:1850,dev_prods:[{n:'Batom Maybelline',val:920},{n:'Blush Vult',val:930}]},{n:'Salão Glamour',fat:36000,c:'Profissional'},{n:'Perfumaria Bella',fat:33000,c:'Varejo'},{n:'Mercado Central',fat:29000,c:'Atacado'},{n:'Ótica Fashion',fat:25000,c:'Varejo'},{n:'Studio Beleza Total',fat:23000,c:'Profissional'},{n:'Drogaria Nortão',fat:20000,c:'Atacado',dias:34},{n:'Empório da Beleza',fat:18000,c:'Varejo',dias:28}]
     },
     { id:2, nome:'Camila Santos', reg:'Chapecó/SC', fat:286000, meta:280000, cli:74, margem:43, loja:'cpo',
       fm:[210000,228000,241000,255000,272000,286000], mm:[222000,232000,244000,256000,270000,280000],
       cats:[{n:'Cosméticos/Maquiagem',fat:99000,margem:46},{n:'Cabelos',fat:76000,margem:43},{n:'Perfumaria',fat:56000,margem:40},{n:'Higiene Pessoal',fat:36000,margem:37},{n:'Profissional',fat:19000,margem:32}],
-      clis:[{n:'Drogaria Saúde Total',fat:56000,c:'Atacado'},{n:'Studio Cabelo & Arte',fat:48000,c:'Profissional'},{n:'Cosméticos VIP',fat:42000,c:'Varejo'},{n:'Supermercado Norte',fat:36000,c:'Atacado'},{n:'Salão Espaço Beleza',fat:33000,c:'Profissional'},{n:'Perfumaria da Praça',fat:28000,c:'Varejo'},{n:'Farmácia Familiar',fat:23000,c:'Atacado'},{n:'Beauty Store',fat:20000,c:'Varejo'}]
+      clis:[{n:'Drogaria Saúde Total',fat:56000,c:'Atacado',dev:2200,dev_prods:[{n:'Perfume Egeo O.Boticário',val:2200}]},{n:'Studio Cabelo & Arte',fat:48000,c:'Profissional'},{n:'Cosméticos VIP',fat:42000,c:'Varejo'},{n:'Supermercado Norte',fat:36000,c:'Atacado'},{n:'Salão Espaço Beleza',fat:33000,c:'Profissional'},{n:'Perfumaria da Praça',fat:28000,c:'Varejo'},{n:'Farmácia Familiar',fat:23000,c:'Atacado'},{n:'Beauty Store',fat:20000,c:'Varejo'}]
     },
     { id:3, nome:'Ricardo Borges', reg:'Francisco Beltrão/PR', fat:227000, meta:240000, cli:61, margem:37, loja:'fb',
       fm:[179000,185000,196000,205000,216000,227000], mm:[192000,200000,208000,218000,230000,240000],
       cats:[{n:'Cosméticos/Maquiagem',fat:63000,margem:41},{n:'Cabelos',fat:58000,margem:38},{n:'Perfumaria',fat:49000,margem:36},{n:'Higiene Pessoal',fat:36000,margem:33},{n:'Profissional',fat:21000,margem:27}],
-      clis:[{n:'Farmácia Popular',fat:49000,c:'Atacado'},{n:'Bazar da Beleza',fat:40000,c:'Varejo'},{n:'Mercadinho São José',fat:34000,c:'Atacado'},{n:'Depósito Cosméticos',fat:30000,c:'Atacado'},{n:'Loja das Fragrâncias',fat:23000,c:'Varejo'},{n:'Salão Belo Corte',fat:21000,c:'Profissional'},{n:'Perfumaria Chique',fat:18000,c:'Varejo',dias:41},{n:'Mercado Boa Vista',fat:12000,c:'Atacado',dias:53}]
+      clis:[{n:'Farmácia Popular',fat:49000,c:'Atacado',dev:1450,dev_prods:[{n:'Primer Facial NYX',val:900},{n:'Pó Compacto Dailus',val:550}]},{n:'Bazar da Beleza',fat:40000,c:'Varejo'},{n:'Mercadinho São José',fat:34000,c:'Atacado'},{n:'Depósito Cosméticos',fat:30000,c:'Atacado'},{n:'Loja das Fragrâncias',fat:23000,c:'Varejo'},{n:'Salão Belo Corte',fat:21000,c:'Profissional'},{n:'Perfumaria Chique',fat:18000,c:'Varejo',dias:41},{n:'Mercado Boa Vista',fat:12000,c:'Atacado',dias:53}]
     },
     { id:4, nome:'Patrícia Lima', reg:'Dois Vizinhos/PR', fat:268000, meta:255000, cli:71, margem:41, loja:'pb',
       fm:[200000,213000,225000,239000,251000,268000], mm:[208000,218000,228000,242000,256000,255000],
       cats:[{n:'Cosméticos/Maquiagem',fat:83000,margem:44},{n:'Cabelos',fat:72000,margem:41},{n:'Perfumaria',fat:58000,margem:39},{n:'Higiene Pessoal',fat:36000,margem:36},{n:'Profissional',fat:19000,margem:29}],
-      clis:[{n:'Drogaria Nobre',fat:63000,c:'Atacado'},{n:'Salão Princesa',fat:51000,c:'Profissional'},{n:'Perfumaria Elite',fat:44000,c:'Varejo'},{n:'Empório Beleza',fat:41000,c:'Varejo'},{n:'Studio Hair Pro',fat:32000,c:'Profissional'},{n:'Farmácia Dois Vizinhos',fat:26000,c:'Atacado'},{n:'Loja Cosméticos & Mais',fat:23000,c:'Varejo'},{n:'Bazar Tudo Belo',fat:18000,c:'Varejo',dias:31}]
+      clis:[{n:'Drogaria Nobre',fat:63000,c:'Atacado',dev:3100,dev_prods:[{n:'Queratina Brazilian Blowout',val:1800},{n:'Progressiva Inoar',val:1300}]},{n:'Salão Princesa',fat:51000,c:'Profissional'},{n:'Perfumaria Elite',fat:44000,c:'Varejo'},{n:'Empório Beleza',fat:41000,c:'Varejo'},{n:'Studio Hair Pro',fat:32000,c:'Profissional'},{n:'Farmácia Dois Vizinhos',fat:26000,c:'Atacado'},{n:'Loja Cosméticos & Mais',fat:23000,c:'Varejo'},{n:'Bazar Tudo Belo',fat:18000,c:'Varejo',dias:31}]
     },
     { id:5, nome:'André Costa', reg:'Palmas/PR', fat:207000, meta:308000, cli:38, margem:32, loja:'fb',
       fm:[192000,187000,199000,194000,189000,207000], mm:[250000,262000,272000,284000,295000,308000],
       cats:[{n:'Cosméticos/Maquiagem',fat:29000,margem:36},{n:'Cabelos',fat:39000,margem:33},{n:'Perfumaria',fat:37000,margem:30},{n:'Higiene Pessoal',fat:40000,margem:31},{n:'Profissional',fat:62000,margem:26}],
-      clis:[{n:'Farmácia Vida',fat:42000,c:'Atacado'},{n:'Bazar Mix',fat:33000,c:'Varejo'},{n:'Mercado Bom Preço',fat:29000,c:'Atacado'},{n:'Loja Beleza & Cia',fat:27000,c:'Varejo'},{n:'Salão Corte & Arte',fat:22000,c:'Profissional'},{n:'Farmácia Palmas',fat:19000,c:'Atacado'},{n:'Beauty Mix',fat:17000,c:'Varejo',dias:44},{n:'Empório do Bem',fat:17000,c:'Varejo',dias:38}]
+      clis:[{n:'Farmácia Vida',fat:42000,c:'Atacado',dev:2600,dev_prods:[{n:'Kit Botox Capilar',val:1500},{n:'Tinta Profissional Wella',val:1100}]},{n:'Bazar Mix',fat:33000,c:'Varejo',dev:870,dev_prods:[{n:'Body Splash Viv!',val:870}]},{n:'Mercado Bom Preço',fat:29000,c:'Atacado'},{n:'Loja Beleza & Cia',fat:27000,c:'Varejo'},{n:'Salão Corte & Arte',fat:22000,c:'Profissional'},{n:'Farmácia Palmas',fat:19000,c:'Atacado'},{n:'Beauty Mix',fat:17000,c:'Varejo',dias:44},{n:'Empório do Bem',fat:17000,c:'Varejo',dias:38}]
     }
   ]
 };
@@ -1335,13 +1336,14 @@ function buildAllCli(){
   const all=[];
   FD.reps.forEach(r=>r.clis.forEach((c,i)=>all.push({...c,rep:r.nome,repId:r.id,cliIdx:i})));
   all.sort((a,b)=>b.fat-a.fat);
-  let h='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Representante</th><th>Faturamento</th><th>Última Compra</th></tr>';
+  let h='<table><tr><th>#</th><th>Cliente</th><th>Canal</th><th>Representante</th><th>Faturamento</th><th>Devoluções</th><th>Última Compra</th></tr>';
   all.slice(0,20).forEach((c,i)=>{
-    const diasBadge=c.dias?`<span class="badge ${c.dias>=45?'b-da':'b-wa'}">${c.dias}d</span>`:'<span class="badge b-ok">Ativo</span>';
+    const diasBadge = c.dias ? `<span class="badge ${c.dias>=45?'b-da':'b-wa'}">${c.dias}d</span>` : '<span class="badge b-ok">Ativo</span>';
+    const devBadge  = c.dev  ? `<span class="badge b-da">${fmt(c.dev)}</span>` : '<span style="color:#ccc">—</span>';
     h+=`<tr class="clickable" onclick="openDirCliDrill(${c.repId},${c.cliIdx})">
       <td>${i+1}</td><td><strong>${c.n}</strong></td>
       <td><span class="badge b-ch">${c.c}</span></td><td>${c.rep}</td>
-      <td>${fmt(c.fat)}</td><td>${diasBadge}</td>
+      <td>${fmt(c.fat)}</td><td>${devBadge}</td><td>${diasBadge}</td>
     </tr>`;
   });
   h+='</table>';
@@ -1492,6 +1494,16 @@ function openDirCliDrill(repId, cliIdx){
       tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)+' ('+pct(c.raw,totalVal)+')'}}}}
   });
 
+  // KPI devolução
+  if(cli.dev){
+    document.getElementById('dir-cli-drill-kpis').innerHTML +=
+      `<div class="kpi-card da">
+        <div class="kpi-label">Devoluções</div>
+        <div class="kpi-value">${fmt(cli.dev)}</div>
+        <div class="kpi-sub">${((cli.dev/cli.fat)*100).toFixed(1)}% do faturamento</div>
+      </div>`;
+  }
+
   document.getElementById('dir-cli-prods').innerHTML = compras.map(c=>{
     const [cc]=mStat(c.margem);
     return `<div>
@@ -1520,6 +1532,38 @@ function openDirCliDrill(repId, cliIdx){
       </table>
     </div>`;
   }).join('');
+
+  // Devoluções
+  const devEl = document.getElementById('dir-cli-dev');
+  if(cli.dev && cli.dev_prods){
+    devEl.innerHTML = `
+      <div style="background:#FFEBEE;border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+        <strong style="color:#c62828;font-size:14px">⚠️ Produtos Devolvidos</strong>
+        <span style="color:#c62828;font-weight:700;font-size:14px">${fmt(cli.dev)} &nbsp;<span style="font-size:12px;font-weight:400">(${((cli.dev/cli.fat)*100).toFixed(1)}% do fat.)</span></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr style="background:#c62828">
+              <th style="padding:9px 14px;color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.5px;text-align:left">Produto Devolvido</th>
+              <th style="padding:9px 14px;color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.5px;text-align:right">Valor da Devolução</th>
+              <th style="padding:9px 14px;color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.5px;text-align:right">% Dev.</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${cli.dev_prods.map(p=>`<tr>
+              <td style="padding:8px 14px;border-bottom:1px solid #ffd0d0;font-size:13px">❌ ${p.n}</td>
+              <td style="padding:8px 14px;border-bottom:1px solid #ffd0d0;font-size:13px;text-align:right;color:#c62828;font-weight:700">${fmt(p.val)}</td>
+              <td style="padding:8px 14px;border-bottom:1px solid #ffd0d0;font-size:12px;text-align:right;color:#999">${((p.val/cli.dev)*100).toFixed(0)}%</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    devEl.style.display='block';
+  } else {
+    devEl.innerHTML='<div style="background:#E8F5E9;border-radius:10px;padding:12px 16px;color:#2e7d32;font-weight:600;font-size:13px">✅ Nenhuma devolução registrada para este cliente</div>';
+    devEl.style.display='block';
+  }
 
   drill.scrollIntoView({behavior:'smooth',block:'start'});
 }
