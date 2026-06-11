@@ -817,9 +817,10 @@ function buildDirCharts(){
   });
   mkChart('ch-cat',{type:'bar',data:{labels:FD.cats.map(c=>c.n),datasets:[
     {label:'Faturamento',data:FD.cats.map(c=>c.fat),backgroundColor:'#007B8ECC',borderRadius:4,datalabels:DL_BARH},
-    {label:'Meta',       data:FD.cats.map(c=>c.meta),backgroundColor:'#26C6DA55',borderRadius:4,datalabels:DL_OFF}
+    {label:'Meta',       data:FD.cats.map(c=>c.meta),backgroundColor:'#26C6DA55',borderRadius:4,
+      datalabels:{...DL_BARH, color:'#007B8E', formatter:v=>'Meta: R$'+(v/1000).toFixed(0)+'k'}}
   ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-    layout:{padding:{right:60}},
+    layout:{padding:{right:90}},
     plugins:{datalabels:{},legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},
     scales:{x:{ticks:{callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
   });
